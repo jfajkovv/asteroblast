@@ -9,8 +9,20 @@ games.init(
 )
 
 
+class Game(object):
+    """Gameplay core mechanics."""
+
+    ORBIT_IMG = games.load_image("./assets/graphics/orbit.png")
+
+    def play(self):
+        games.screen.background = Game.ORBIT_IMG
+
+        games.screen.mainloop()
+
+
 def main():
-    pass
+    asteroblast = Game()
+    asteroblast.play()
 
 
 if __name__ == "__main__":
