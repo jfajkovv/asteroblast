@@ -24,6 +24,24 @@ class Spacecraft(games.Sprite):
             y=y
         )
 
+    # Check for important object events in real time.
+    def update(self):
+        # Allow for an upward movement via UP ARROW KEY.
+        if games.keyboard.is_pressed(games.K_UP):
+            self.y -= 1
+
+        # Allow for downward movement via DOWN ARROW KEY.
+        if games.keyboard.is_pressed(games.K_DOWN):
+            self.y += 1
+
+        # Allow for leftward movement via LEFT ARROW KEY.
+        if games.keyboard.is_pressed(games.K_LEFT):
+            self.x -= 1
+
+        # Allow for rightward movement via RIGH ARROW KEY.
+        if games.keyboard.is_pressed(games.K_RIGHT):
+            self.x += 1
+
 
 class Game(object):
     """Gameplay core mechanics."""
@@ -34,7 +52,7 @@ class Game(object):
         transparent=False
     )
 
-    # Handy constants.
+    # Set up handy constants.
     SCREEN_WIDTH_CENTER = games.screen.width/2
     SCREEN_HEIGHT_CENTER = games.screen.height/2
 
