@@ -13,7 +13,7 @@ WINDOW_WIDTH = games.screen.width
 WINDOW_HEIGHT = games.screen.height
 
 
-class Wrapper(games.Sprite):
+class ScreenWrapper(games.Sprite):
     """The screen "wrapper"."""
 
     # If the object gets beyond given edge of the screen,
@@ -36,7 +36,7 @@ class Wrapper(games.Sprite):
             self.left = WINDOW_WIDTH
 
 
-class Spacecraft(Wrapper):
+class Spacecraft(ScreenWrapper):
     """An actual player."""
 
     # Load assets.
