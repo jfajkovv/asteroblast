@@ -8,8 +8,35 @@ games.init(
     fps=60
 )
 
+# Some useful globals.
+WINDOW_WIDTH = games.screen.width
+WINDOW_HEIGHT = games.screen.height
 
-class Spacecraft(games.Sprite):
+
+class Wrapper(games.Sprite):
+    """The screen "wrapper"."""
+
+    # If the object gets beyond given edge of the screen,
+    # transfer it to the opposite side...
+    def update(self):
+        # ...from bottom to top.
+        if self.top > WINDOW_HEIGHT:
+            self.bottom = 0
+
+        # ...from top to bottom.
+        if self.bottom < 0:
+            self.top = WINDOW_HEIGHT
+
+        # ... from right to left.
+        if self.left > WINDOW_WIDTH:
+            self.right = 0
+
+        # ...from left to right.
+        if self.right < 0:
+            self.left = WINDOW_WIDTH
+
+
+class Spacecraft(Wrapper):
     """An actual player."""
 
     # Load assets.
@@ -26,21 +53,24 @@ class Spacecraft(games.Sprite):
 
     # Check for important object events in real time.
     def update(self):
+        # Inherit wrapping mechanics.
+        super(Spacecraft, self).update()
+
         # Allow for an upward movement via UP ARROW KEY.
         if games.keyboard.is_pressed(games.K_UP):
-            self.y -= 1
+            self.y -= 5
 
         # Allow for downward movement via DOWN ARROW KEY.
         if games.keyboard.is_pressed(games.K_DOWN):
-            self.y += 1
+            self.y += 5
 
         # Allow for leftward movement via LEFT ARROW KEY.
         if games.keyboard.is_pressed(games.K_LEFT):
-            self.x -= 1
+            self.x -= 5
 
         # Allow for rightward movement via RIGH ARROW KEY.
         if games.keyboard.is_pressed(games.K_RIGHT):
-            self.x += 1
+            self.x += 5
 
 
 class Game(object):
@@ -53,8 +83,8 @@ class Game(object):
     )
 
     # Set up handy constants.
-    SCREEN_WIDTH_CENTER = games.screen.width/2
-    SCREEN_HEIGHT_CENTER = games.screen.height/2
+    SCREEN_WIDTH_CENTER = WINDOW_WIDTH/2
+    SCREEN_HEIGHT_CENTER = WINDOW_HEIGHT/2
 
 
     def __init__(self):
