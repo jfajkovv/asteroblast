@@ -1,4 +1,5 @@
 # Include all necessary tools.
+import math
 from superwires import games
 
 # Create window and get access to games instructions subset.
@@ -40,6 +41,7 @@ class Spacecraft(ScreenWrapper):
     """An actual player."""
 
     TURN_FACTOR = 5
+    VELOCITY_FACTOR = 0.1
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image('./assets/graphics/spacecraft.png')
@@ -65,6 +67,17 @@ class Spacecraft(ScreenWrapper):
         # Turn ship rightwards along it's axis.
         if games.keyboard.is_pressed(games.K_RIGHT):
             self.angle += Spacecraft.TURN_FACTOR
+
+        # Propel ship forward.
+        if games.keyboard.is_pressed(games.K_UP):
+            # The trick is to shift the craft along the cartesian coordinate system:
+            # using math sine and cosine functions here to determine the exact placement;
+            # the actual angle of the sprite has to be converted from degrees to radians,
+            # because superwires uses degrees and math trigonometric functions are running
+            # on radians;
+            # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY...
+            self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
+            self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
 
 class Game(object):
