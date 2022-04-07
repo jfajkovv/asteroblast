@@ -53,6 +53,9 @@ class Blast(ScreenWrapper):
         x = craft_x + Blast.SPAWN_BUFFER_PX * math.sin(math.radians(craft_angle))
         y = craft_y + Blast.SPAWN_BUFFER_PX * -math.cos(math.radians(craft_angle))
 
+        # Projectile shall fly freely onwards from shooting spot.
+        # Again, the movement calculation is along the x, y coordinate system -
+        # crunched similarly to the Spaceship positioning method.
         dx = Blast.VELOCITY_FACTOR * math.sin(math.radians(craft_angle))
         dy = Blast.VELOCITY_FACTOR * -math.cos(math.radians(craft_angle))
 
