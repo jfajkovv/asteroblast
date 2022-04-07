@@ -37,6 +37,22 @@ class ScreenWrapper(games.Sprite):
             self.left = WINDOW_WIDTH
 
 
+class Blast(ScreenWrapper):
+    """A projectile. Spacecraft's blaster weapon system."""
+
+    # Load assets.
+    BLAST_IMG = games.load_image("./assets/graphics/blast-ball.png")
+
+    def __init__(self, craft_x, craft_y, craft_angle):
+        # Appeal to the ScreenWrapper constructor in order
+        # to set up the image and call upon coordinates.
+        super(Blast, self).__init__(
+            image=Blast.BLAST_IMG,
+            x=craft_x,
+            y=craft_y
+        )
+
+
 class Spacecraft(ScreenWrapper):
     """An actual player."""
 
@@ -88,6 +104,11 @@ class Spacecraft(ScreenWrapper):
         # Everything happens in terms of (x, y) coordinate system.
         self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
+
+        # Shoot a projectile via SPACE KEY.
+        if games.keyboard.is_pressed(games.K_SPACE):
+            new_blast = Blast(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
+            games.screen.add(new_blast)
 
 
 class Game(object):
