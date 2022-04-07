@@ -40,16 +40,30 @@ class ScreenWrapper(games.Sprite):
 class Blast(ScreenWrapper):
     """A projectile. Spacecraft's blaster weapon system."""
 
+    SPAWN_BUFFER_PX = 30
+    VELOCITY_FACTOR = 5
+
     # Load assets.
     BLAST_IMG = games.load_image("./assets/graphics/blast-ball.png")
 
     def __init__(self, craft_x, craft_y, craft_angle):
+        # Object image representation shall spawn itself in front of the spacecraft.
+        # Projectile position is calculated similarly to the Spacecraft class method.
+        # The only difference is the shift in pixels by adding SPAWN_BUFFER_PX value.
+        x = craft_x + Blast.SPAWN_BUFFER_PX * math.sin(math.radians(craft_angle))
+        y = craft_y + Blast.SPAWN_BUFFER_PX * -math.cos(math.radians(craft_angle))
+
+        dx = Blast.VELOCITY_FACTOR * math.sin(math.radians(craft_angle))
+        dy = Blast.VELOCITY_FACTOR * -math.cos(math.radians(craft_angle))
+
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Blast, self).__init__(
             image=Blast.BLAST_IMG,
-            x=craft_x,
-            y=craft_y
+            x=x,
+            y=y,
+            dx=dx,
+            dy=dy
         )
 
 
