@@ -42,12 +42,13 @@ class Spacecraft(ScreenWrapper):
 
     TURN_FACTOR = 5
     VELOCITY_FACTOR = 0.1
+    VELOCITY_MAX = 4
 
     # Load assets.
-    SPACECRAFT_IMG = games.load_image('./assets/graphics/spacecraft.png')
+    SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
 
     def __init__(self, x, y):
-        # Appeal to the Sprite constructor in order
+        # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Spacecraft, self).__init__(
             image=Spacecraft.SPACECRAFT_IMG,
@@ -60,11 +61,11 @@ class Spacecraft(ScreenWrapper):
         # Inherit wrapping mechanics.
         super(Spacecraft, self).update()
 
-        # Turn ship leftwards along it's axis.
+        # Turn ship leftwards along it's axis via LEFT KEY.
         if games.keyboard.is_pressed(games.K_LEFT):
             self.angle -= Spacecraft.TURN_FACTOR
 
-        # Turn ship rightwards along it's axis.
+        # Turn ship rightwards along it's axis via RIGHT KEY.
         if games.keyboard.is_pressed(games.K_RIGHT):
             self.angle += Spacecraft.TURN_FACTOR
 
@@ -78,6 +79,15 @@ class Spacecraft(ScreenWrapper):
             # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY...
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
+
+        # ...until it's regulated via update() method itself - the craft cannot go faster
+        # than value specified in VELOCITY_MAX constant.
+        # Basically these two lines are picking the velocity factor between:
+        # 0, which is game starting value -
+        # and 4, which is max speed (VELOCITY_MAX).
+        # Everything happens in terms of (x, y) coordinate system.
+        self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
+        self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
 
 class Game(object):
