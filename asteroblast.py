@@ -39,6 +39,8 @@ class ScreenWrapper(games.Sprite):
 class Spacecraft(ScreenWrapper):
     """An actual player."""
 
+    TURN_FACTOR = 5
+
     # Load assets.
     SPACECRAFT_IMG = games.load_image('./assets/graphics/spacecraft.png')
 
@@ -56,21 +58,13 @@ class Spacecraft(ScreenWrapper):
         # Inherit wrapping mechanics.
         super(Spacecraft, self).update()
 
-        # Allow for an upward movement via UP ARROW KEY.
-        if games.keyboard.is_pressed(games.K_UP):
-            self.y -= 5
-
-        # Allow for downward movement via DOWN ARROW KEY.
-        if games.keyboard.is_pressed(games.K_DOWN):
-            self.y += 5
-
-        # Allow for leftward movement via LEFT ARROW KEY.
+        # Turn ship leftwards along it's axis.
         if games.keyboard.is_pressed(games.K_LEFT):
-            self.x -= 5
+            self.angle -= Spacecraft.TURN_FACTOR
 
-        # Allow for rightward movement via RIGH ARROW KEY.
+        # Turn ship rightwards along it's axis.
         if games.keyboard.is_pressed(games.K_RIGHT):
-            self.x += 5
+            self.angle += Spacecraft.TURN_FACTOR
 
 
 class Game(object):
