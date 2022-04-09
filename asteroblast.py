@@ -36,12 +36,18 @@ class ScreenWrapper(games.Sprite):
         if self.right < 0:
             self.left = WINDOW_WIDTH
 
+    # Destroy the object -- remove it from the screen.
+    def die(self):
+        self.destroy()
+
 
 class Blast(ScreenWrapper):
     """A projectile. Spacecraft's blaster weapon system."""
 
-    SPAWN_BUFFER_PX = 30
+    SPAWN_BUFFER_PX = 25
     VELOCITY_FACTOR = 5
+    BLAST_LIFETIME = 55
+    BLAST_DELAY = 50
 
     # Load assets.
     BLAST_IMG = games.load_image("./assets/graphics/blast-ball.png")
@@ -69,6 +75,20 @@ class Blast(ScreenWrapper):
             dy=dy
         )
 
+        self.lifetime = Blast.BLAST_LIFETIME
+
+    # Check for important object events in real time.
+    def update(self):
+        # Inherit wrapping mechanics.
+        super(Blast, self).update()
+
+        # Decrement the life time of the projectile...
+        self.lifetime -= 1
+        # ... and remove it from the screen if it's lifetime parameter
+        # reaches 0.
+        if self.lifetime == 0:
+            self.die()
+
 
 class Spacecraft(ScreenWrapper):
     """An actual player."""
@@ -76,6 +96,7 @@ class Spacecraft(ScreenWrapper):
     TURN_FACTOR = 5
     VELOCITY_FACTOR = 0.1
     VELOCITY_MAX = 4
+    BLASTER_DELAY = 30
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
@@ -88,6 +109,8 @@ class Spacecraft(ScreenWrapper):
             x=x,
             y=y
         )
+
+        self.blaster_cooldown = 0
 
     # Check for important object events in real time.
     def update(self):
@@ -113,7 +136,7 @@ class Spacecraft(ScreenWrapper):
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
-        # ...until it's regulated via update() method itself - the craft cannot go faster
+        # ...until it's regulated via update() method itself -- the craft cannot go faster
         # than value specified in VELOCITY_MAX constant.
         # Basically these two lines are picking the velocity factor between:
         # 0, which is game starting value -
@@ -123,9 +146,15 @@ class Spacecraft(ScreenWrapper):
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
         # Shoot a projectile via SPACE KEY.
-        if games.keyboard.is_pressed(games.K_SPACE):
+        # Only works if the blaster has cooled off!
+        if games.keyboard.is_pressed(games.K_SPACE) and self.blaster_cooldown == 0:
             new_blast = Blast(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
             games.screen.add(new_blast)
+            self.blaster_cooldown = Spacecraft.BLASTER_DELAY
+
+        # Wait until the blaster cools off.
+        if self.blaster_cooldown:
+            self.blaster_cooldown -= 1
 
 
 class Game(object):
@@ -152,12 +181,12 @@ class Game(object):
         games.screen.add(self.spacecraft)
 
 
-    # Allow the player to perform an actual gameplay - level by level.
+    # Allow the player to perform an actual gameplay -- level by level.
     def play(self):
         # Set up chosen background.
         games.screen.background = Game.ORBIT_IMG
 
-        # Run the actual game - keep the screen running
+        # Run the actual game -- keep the screen running
         # by evoking the main loop.
         games.screen.mainloop()
 
