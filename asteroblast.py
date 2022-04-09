@@ -1,5 +1,6 @@
 # Include all necessary tools.
 import math
+import random
 from superwires import games
 
 # Create window and get access to games instructions subset.
@@ -44,6 +45,8 @@ class ScreenWrapper(games.Sprite):
 class Debris(ScreenWrapper):
     """Space rock -- enemy of the game.An asteroid to be shot."""
 
+    VELOCITY = 5
+
     # Asteroids classification constants.
     SMALL = 1
     MEDIUM = 2
@@ -62,7 +65,18 @@ class Debris(ScreenWrapper):
         super(Debris, self).__init__(
             image=Debris.ASTEROID_IMAGES[size],
             x=x,
-            y=y
+            y=y,
+            # Set up debris speed randomly:
+            # Debris.VELOCITY factor gets multiplied by a random number
+            # from range of 0-0.9(9) for diversity. Next, it's getting
+            # multiplied by either -1 or 1 which determines it's positive/negative
+            # coordinates feed -- direction of movement.
+            # The equation ends divided by size of the object --
+            # smaller ones tend to be speedier.
+            dx = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            dy = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            # Set up debris angle randomly for variety.
+            angle=random.randrange(361)
         )
 
         self.size = size
@@ -230,12 +244,15 @@ class Game(object):
         # Player gets more debris to shoot with each level iteration.
         self.level += 1
         for _ in range(self.level):
+            # TODO: put asteroids randomly on the screen,
+            # avoid spawning at the ship or close to it.
             x=100
             y=200
+
             new_debris = Debris(
                 x=x,
                 y=x,
-                size=Debris.BIG
+                size=Debris.BIG,
             )
             games.screen.add(new_debris)
 
