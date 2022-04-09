@@ -41,12 +41,37 @@ class ScreenWrapper(games.Sprite):
         self.destroy()
 
 
+class Debris(ScreenWrapper):
+    """Space rock -- enemy of the game.An asteroid to be shot."""
+
+    # Asteroids classification constants.
+    SMALL = 1
+    MEDIUM = 2
+    BIG = 3
+
+    # Load assets.
+    ASTEROID_IMAGES = {
+        SMALL: games.load_image('./assets/images/asteroid-small.png'),
+        MEDIUM: games.load_image('./assets/images/asteroid-medium.png'),
+        BIG: games.load_image('./assets/images/asteroid-big.png')
+    }
+
+    def __init__(self, x, y, size):
+        # Appeal to the ScreenWrapper constructor in order
+        # to set up the image and call upon coordinates.
+        super(Debris, self).__init__(
+            image=ASTEROID_IMAGES[size],
+            x=x,
+            y=y
+        )
+
+
 class Blast(ScreenWrapper):
     """A projectile. Spacecraft's blaster weapon system."""
 
     SPAWN_BUFFER_PX = 25
-    VELOCITY_FACTOR = 5
-    BLAST_LIFETIME = 55
+    VELOCITY_FACTOR = 10
+    BLAST_LIFETIME = 30
     BLAST_DELAY = 50
 
     # Load assets.
@@ -153,6 +178,7 @@ class Spacecraft(ScreenWrapper):
             self.blaster_cooldown = Spacecraft.BLASTER_DELAY
 
         # Wait until the blaster cools off.
+        # This avoids on-screen projectile overcrowding.
         if self.blaster_cooldown:
             self.blaster_cooldown -= 1
 
