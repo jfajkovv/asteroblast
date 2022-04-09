@@ -51,19 +51,21 @@ class Debris(ScreenWrapper):
 
     # Load assets.
     ASTEROID_IMAGES = {
-        SMALL: games.load_image('./assets/images/asteroid-small.png'),
-        MEDIUM: games.load_image('./assets/images/asteroid-medium.png'),
-        BIG: games.load_image('./assets/images/asteroid-big.png')
+        SMALL: games.load_image('./assets/graphics/asteroid-small.png'),
+        MEDIUM: games.load_image('./assets/graphics/asteroid-medium.png'),
+        BIG: games.load_image('./assets/graphics/asteroid-big.png')
     }
 
     def __init__(self, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Debris, self).__init__(
-            image=ASTEROID_IMAGES[size],
+            image=Debris.ASTEROID_IMAGES[size],
             x=x,
             y=y
         )
+
+        self.size = size
 
 
 class Blast(ScreenWrapper):
@@ -198,6 +200,10 @@ class Game(object):
 
 
     def __init__(self):
+        # This defines level number and it's difficulty.
+        # Look up advance() below for details.
+        self.level = 0
+
         # Construct spacecraft object
         # and add it to the screen.
         self.spacecraft = Spacecraft(
@@ -212,9 +218,26 @@ class Game(object):
         # Set up chosen background.
         games.screen.background = Game.ORBIT_IMG
 
+        # Start particular level.
+        self.advance()
+
         # Run the actual game -- keep the screen running
         # by evoking the main loop.
         games.screen.mainloop()
+
+    def advance(self):
+        # Increment the level number and it's difficulty.
+        # Player gets more debris to shoot with each level iteration.
+        self.level += 1
+        for _ in range(self.level):
+            x=100
+            y=200
+            new_debris = Debris(
+                x=x,
+                y=x,
+                size=Debris.BIG
+            )
+            games.screen.add(new_debris)
 
 
 def main():
