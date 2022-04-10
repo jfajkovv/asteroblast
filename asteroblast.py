@@ -246,8 +246,10 @@ class Game(object):
         for _ in range(self.level):
             # Avoid spawning at the ship or close to it.
             SPAWN_BUFFER_PX = 300
-            x_shift = random.randrange(WINDOW_WIDTH) - self.spacecraft.x + SPAWN_BUFFER_PX
-            y_shift = random.randrange(WINDOW_HEIGHT) - self.spacecraft.y + SPAWN_BUFFER_PX
+            x_shift = random.randint((self.spacecraft.x + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
+            print(x_shift)
+            y_shift = random.randint((self.spacecraft.y + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
+            print(y_shift)
 
             new_debris = Debris(
                 x=x_shift,
