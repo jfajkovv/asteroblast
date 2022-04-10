@@ -244,14 +244,14 @@ class Game(object):
         # Player gets more debris to shoot with each level iteration.
         self.level += 1
         for _ in range(self.level):
-            # TODO: put asteroids randomly on the screen,
-            # avoid spawning at the ship or close to it.
-            x=100
-            y=200
+            # Avoid spawning at the ship or close to it.
+            SPAWN_BUFFER_PX = 300
+            x_shift = random.randrange(WINDOW_WIDTH) - self.spacecraft.x + SPAWN_BUFFER_PX
+            y_shift = random.randrange(WINDOW_HEIGHT) - self.spacecraft.y + SPAWN_BUFFER_PX
 
             new_debris = Debris(
-                x=x,
-                y=x,
+                x=x_shift,
+                y=y_shift,
                 size=Debris.BIG,
             )
             games.screen.add(new_debris)
