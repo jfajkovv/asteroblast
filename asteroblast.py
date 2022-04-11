@@ -42,6 +42,58 @@ class ScreenWrapper(games.Sprite):
         self.destroy()
 
 
+class Bumper(ScreenWrapper):
+    """Collision detection system."""
+
+    def update(self):
+        # Inherit wrapping mechanics.
+        super(Bumper, self).update()
+
+        # Simple check if any other sprite overlaps self-object...
+        if self.overlapping_sprites:
+            # ... and for any such sprite -- it should destroy itself.
+            for sprite in self.overlapping_sprites:
+                sprite.die()
+            self.die()
+
+    def die(self):
+        # Create new outburst instance and put it onto the screen.
+        new_explosion = Explosion(x=self.x, y=self.y)
+        games.screen.add(new_explosion)
+        self.destroy()
+
+
+class Explosion(games.Animation):
+    """Outburst animation after collision detection."""
+
+    # Load assets.
+    ANIMATION_IMAGES = [
+        "./assets/graphics/explosion-1.png",
+        "./assets/graphics/explosion-2.png",
+        "./assets/graphics/explosion-3.png",
+        "./assets/graphics/explosion-4.png",
+        "./assets/graphics/explosion-5.png",
+        "./assets/graphics/explosion-6.png",
+        "./assets/graphics/explosion-7.png",
+        "./assets/graphics/explosion-8.png",
+        "./assets/graphics/explosion-9.png",
+        "./assets/graphics/explosion-10.png",
+    ]
+
+    def __init__(self, x, y):
+        # Appeal to the games.Animation constructor in order
+        # to set up frames and call upon coordinates.
+        super(Explosion, self).__init__(
+            images=Explosion.ANIMATION_IMAGES,
+            x=x,
+            y=y,
+            # Configure animation FPS.
+            repeat_interval=5,
+            # Set how many times animation shall display itself.
+            n_repeats=1,
+            is_collideable=False
+        )
+
 class Debris(ScreenWrapper):
     """Space rock -- enemy of the game.An asteroid to be shot."""
 
@@ -82,10 +134,10 @@ class Debris(ScreenWrapper):
         self.size = size
 
 
-class Blast(ScreenWrapper):
+class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
-    SPAWN_BUFFER_PX = 25
+    SPAWN_BUFFER_PX = 30
     VELOCITY_FACTOR = 10
     BLAST_LIFETIME = 30
     BLAST_DELAY = 50
@@ -113,14 +165,15 @@ class Blast(ScreenWrapper):
             x=x,
             y=y,
             dx=dx,
-            dy=dy
+            dy=dy,
+            is_collideable=True
         )
 
         self.lifetime = Blast.BLAST_LIFETIME
 
     # Check for important object events in real time.
     def update(self):
-        # Inherit wrapping mechanics.
+        # Inherit wrapping mechanics and collision detection.
         super(Blast, self).update()
 
         # Decrement the life time of the projectile...
@@ -128,10 +181,10 @@ class Blast(ScreenWrapper):
         # ... and remove it from the screen if it's lifetime parameter
         # reaches 0.
         if self.lifetime == 0:
-            self.die()
+            self.destroy()
 
 
-class Spacecraft(ScreenWrapper):
+class Spacecraft(Bumper):
     """An actual player."""
 
     TURN_FACTOR = 5
@@ -148,14 +201,15 @@ class Spacecraft(ScreenWrapper):
         super(Spacecraft, self).__init__(
             image=Spacecraft.SPACECRAFT_IMG,
             x=x,
-            y=y
+            y=y,
+            is_collideable=True
         )
 
         self.blaster_cooldown = 0
 
     # Check for important object events in real time.
     def update(self):
-        # Inherit wrapping mechanics.
+        # Inherit wrapping mechanics and collision detection.
         super(Spacecraft, self).update()
 
         # Turn ship leftwards along it's axis via LEFT KEY.
@@ -216,7 +270,7 @@ class Game(object):
     def __init__(self):
         # This defines level number and it's difficulty.
         # Look up advance() below for details.
-        self.level = 0
+        self.depth = 0
 
         # Construct spacecraft object
         # and add it to the screen.
@@ -240,16 +294,14 @@ class Game(object):
         games.screen.mainloop()
 
     def advance(self):
-        # Increment the level number and it's difficulty.
+        # Increment the level depth and it's difficulty.
         # Player gets more debris to shoot with each level iteration.
-        self.level += 1
-        for _ in range(self.level):
+        self.depth += 1
+        for _ in range(self.depth):
             # Avoid spawning at the ship or close to it.
             SPAWN_BUFFER_PX = 300
             x_shift = random.randint((self.spacecraft.x + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
-            print(x_shift)
             y_shift = random.randint((self.spacecraft.y + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
-            print(y_shift)
 
             new_debris = Debris(
                 x=x_shift,
