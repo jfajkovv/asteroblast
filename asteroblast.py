@@ -97,7 +97,8 @@ class Explosion(games.Animation):
 class Debris(ScreenWrapper):
     """Space rock -- enemy of the game.An asteroid to be shot."""
 
-    VELOCITY = 5
+    VELOCITY = 3
+    CRASH_SPAWNS = 2
 
     # Asteroids classification constants.
     SMALL = 1
@@ -132,6 +133,20 @@ class Debris(ScreenWrapper):
         )
 
         self.size = size
+
+    def die(self):
+        # Make space rocks break up until there is no smaller size.
+        if self.size != Debris.SMALL:
+            for _ in range(Debris.CRASH_SPAWNS):
+                # Spawn two smaller sized asteroids in the place of the crash.
+                new_debris = Debris(
+                    x=self.x,
+                    y=self.y,
+                    size=self.size-1
+                )
+                games.screen.add(new_debris)
+
+        super(Debris, self).die()
 
 
 class Blast(Bumper):
