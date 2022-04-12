@@ -112,7 +112,10 @@ class Debris(ScreenWrapper):
         BIG: games.load_image('./assets/graphics/asteroid-big.png')
     }
 
-    def __init__(self, x, y, size):
+    # Class var for debris count.
+    belt = 0
+
+    def __init__(self, game, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Debris, self).__init__(
@@ -133,13 +136,21 @@ class Debris(ScreenWrapper):
         )
 
         self.size = size
+        self.game = game
+
+        Debris.belt += 1
+        print(Debris.belt)
 
     def die(self):
+        Debris.belt -= 1
+        print(Debris.belt)
+
         # Make space rocks break up until there is no smaller size.
         if self.size != Debris.SMALL:
             for _ in range(Debris.CRASH_SPAWNS):
                 # Spawn two smaller sized asteroids in the place of the crash.
                 new_debris = Debris(
+                    game=self.game,
                     x=self.x,
                     y=self.y,
                     size=self.size-1
@@ -148,11 +159,17 @@ class Debris(ScreenWrapper):
 
         super(Debris, self).die()
 
+        # If there are no space rocks left...
+        if Debris.belt == 0:
+            # ... appeal to the Game class and it's advance method
+            # in order to get to higher level.
+            self.game.advance()
+
 
 class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
-    SPAWN_BUFFER_PX = 30
+    SPAWN_BUFFER_PX = 40
     VELOCITY_FACTOR = 10
     BLAST_LIFETIME = 30
     BLAST_DELAY = 50
@@ -313,12 +330,14 @@ class Game(object):
         # Player gets more debris to shoot with each level iteration.
         self.depth += 1
         for _ in range(self.depth):
-            # Avoid spawning at the ship or close to it.
+            # Avoid spawning debris on the ship or close to it.
             SPAWN_BUFFER_PX = 300
-            x_shift = random.randint((self.spacecraft.x + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
-            y_shift = random.randint((self.spacecraft.y + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
+            # TODO: these two need a fix - probaably faulty logic, sometimes crashes the game...
+            x_shift = random.randint((int(self.spacecraft.x) + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
+            y_shift = random.randint((int(self.spacecraft.y) + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
 
             new_debris = Debris(
+                game=self,
                 x=x_shift,
                 y=y_shift,
                 size=Debris.BIG,
