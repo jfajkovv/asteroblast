@@ -274,7 +274,8 @@ class Spacecraft(Bumper):
 
         # Shoot a projectile via SPACE KEY.
         # Only works if the blaster has cooled off!
-        if games.keyboard.is_pressed(games.K_SPACE) and self.blaster_cooldown == 0:
+        if (games.keyboard.is_pressed(games.K_SPACE) and self.blaster_cooldown == 0) \
+        or (games.keyboard.is_pressed(games.K_f) and self.blaster_cooldown ==0):
             new_blast = Blast(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
             games.screen.add(new_blast)
             self.blaster_cooldown = Spacecraft.BLASTER_DELAY
@@ -331,10 +332,11 @@ class Game(object):
         self.depth += 1
         for _ in range(self.depth):
             # Avoid spawning debris on the ship or close to it.
-            SPAWN_BUFFER_PX = 300
-            # TODO: these two need a fix - probaably faulty logic, sometimes crashes the game...
-            x_shift = random.randint((int(self.spacecraft.x) + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
-            y_shift = random.randint((int(self.spacecraft.y) + SPAWN_BUFFER_PX) * random.choice([-1, 1]), WINDOW_WIDTH)
+            MIN_SPAWN_BUFFER_PX = 300
+            MAX_SPAWN_BUFFER_PX = 350
+
+            x_shift = self.spacecraft.x + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
+            y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
             new_debris = Debris(
                 game=self,
