@@ -263,7 +263,7 @@ class Spacecraft(Bumper):
             # the actual angle of the sprite has to be converted from degrees to radians,
             # because superwires uses degrees and math trigonometric functions are running
             # on radians;
-            # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY...
+            # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY.
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
@@ -284,14 +284,7 @@ class Spacecraft(Bumper):
             elif self.dy < 0:
                 self.dy += Spacecraft.VELOCITY_FACTOR
 
-        # ...until it's regulated via update() method itself -- the craft cannot go faster
-        # than value specified in VELOCITY_MAX constant.
-        # Basically these two lines are picking the velocity factor between:
-        # 0, which is game starting value -
-        # and 4, which is max speed (VELOCITY_MAX).
-        # Everything happens in terms of (x, y) coordinate system.
-        self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
-        self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
+        self.regulate_velocity()
 
         # Shoot a projectile via SPACE KEY.
         # Only works if the blaster has cooled off!
@@ -305,6 +298,16 @@ class Spacecraft(Bumper):
         # This avoids on-screen projectile overcrowding.
         if self.blaster_cooldown:
             self.blaster_cooldown -= 1
+
+    # Velocity is regulated via update() method itself -- the craft cannot go faster
+    # than value specified in VELOCITY_MAX constant.
+    # Basically these two lines are picking the velocity factor between:
+    # 0, which is game starting value -
+    # and 4, which is max speed (VELOCITY_MAX).
+    # Everything happens in terms of (x, y) coordinate system.
+    def regulate_velocity(self):
+        self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
+        self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
 
 class Game(object):
