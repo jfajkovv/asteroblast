@@ -223,6 +223,7 @@ class Spacecraft(Bumper):
     TURN_FACTOR = 5
     VELOCITY_FACTOR = 0.1
     VELOCITY_MAX = 4
+    REVERSE_PULL_FACTOR = 0.07
     BLASTER_DELAY = 30
 
     # Load assets.
@@ -266,10 +267,22 @@ class Spacecraft(Bumper):
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Decelerate -- init reverse pull.
+        # Activate reverse pull.
         if games.keyboard.is_pressed(games.K_DOWN):
-            self.dx -= Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
-            self.dy -= Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
+            self.dx -= Spacecraft.REVERSE_PULL_FACTOR * math.sin(math.radians(self.angle))
+            self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
+
+        # Decelerate the ship until stillness.
+        if games.keyboard.is_pressed(games.K_r):
+            if self.dx > 0:
+                self.dx -= Spacecraft.VELOCITY_FACTOR
+            elif self.dx < 0:
+                self.dx += Spacecraft.VELOCITY_FACTOR
+
+            if self.dy > 0:
+                self.dy -= Spacecraft.VELOCITY_FACTOR
+            elif self.dy < 0:
+                self.dy += Spacecraft.VELOCITY_FACTOR
 
         # ...until it's regulated via update() method itself -- the craft cannot go faster
         # than value specified in VELOCITY_MAX constant.
