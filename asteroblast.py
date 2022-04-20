@@ -267,12 +267,12 @@ class Spacecraft(Bumper):
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Activate reverse pull.
+        # Activate reverse pull via DOWN KEY.
         if games.keyboard.is_pressed(games.K_DOWN):
             self.dx -= Spacecraft.REVERSE_PULL_FACTOR * math.sin(math.radians(self.angle))
             self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Decelerate the ship until stillness.
+        # Decelerate the ship until stillness via R KEY.
         if games.keyboard.is_pressed(games.K_r):
             if self.dx > 0:
                 self.dx -= Spacecraft.VELOCITY_FACTOR
@@ -286,7 +286,7 @@ class Spacecraft(Bumper):
 
         self.regulate_velocity()
 
-        # Shoot a projectile via SPACE KEY.
+        # Shoot a projectile via SPACE KEY or F KEY.
         # Only works if the blaster has cooled off!
         if (games.keyboard.is_pressed(games.K_SPACE) and self.blaster_cooldown == 0) \
         or (games.keyboard.is_pressed(games.K_f) and self.blaster_cooldown ==0):
