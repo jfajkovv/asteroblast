@@ -1,6 +1,7 @@
 # Include all necessary tools.
 import math
 import random
+# https://pythonhosted.org/SuperWires/index.html
 from superwires import games
 
 # Create window and get access to games instructions subset.
@@ -241,6 +242,8 @@ class Spacecraft(Bumper):
 
     # Check for important object events in real time.
     def update(self):
+        print(self.dx, self.dy)
+
         # Inherit wrapping mechanics and collision detection.
         super(Spacecraft, self).update()
 
@@ -262,6 +265,11 @@ class Spacecraft(Bumper):
             # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY...
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
+
+        # Decelerate -- init reverse pull.
+        if games.keyboard.is_pressed(games.K_DOWN):
+            self.dx -= Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
+            self.dy -= Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
         # ...until it's regulated via update() method itself -- the craft cannot go faster
         # than value specified in VELOCITY_MAX constant.
