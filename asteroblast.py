@@ -363,7 +363,7 @@ class Game(object):
                 game=self,
                 x=x_shift,
                 y=y_shift,
-                size=Debris.BIG,
+                size=random.randint(Debris.MEDIUM, Debris.BIG)
             )
             games.screen.add(new_debris)
 
