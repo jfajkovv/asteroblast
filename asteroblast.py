@@ -162,6 +162,16 @@ class Debris(ScreenWrapper):
 
         super(Debris, self).die()
 
+        # Add some value to the score.
+        if self.size == Debris.BIG:
+            self.game.score.value += 1
+        elif self.size == Debris.MEDIUM:
+            self.game.score.value += 2
+        elif self.size == Debris.SMALL:
+            self.game.score.value += 3
+
+        self.game.score.value += int(30/self.size)
+
         # If there are no space rocks left...
         if Debris.belt == 0:
             # ... appeal to the Game class and it's advance method
@@ -341,7 +351,7 @@ class Game(object):
     )
 
     # Set up handy constants.
-    DEPTH_TEXT_HEIGHT = 25
+    TEXT_HEIGHT = 25
 
 
     def __init__(self):
@@ -355,6 +365,17 @@ class Game(object):
             size=0,
             color=color.gray
         )
+
+        # Score and it's display.
+        self.score = games.Text(
+            value=0,
+            size=20,
+            color=color.gray,
+            x=WINDOW_WIDTH-25,
+            top=25,
+            is_collideable=False
+        )
+        games.screen.add(self.score)
 
         # Construct spacecraft object
         # and add it to the screen.
@@ -391,7 +412,7 @@ class Game(object):
             size=25,
             color=color.gray,
             x=SCREEN_WIDTH_CENTER,
-            y=Game.DEPTH_TEXT_HEIGHT,
+            y=Game.TEXT_HEIGHT,
             is_collideable=False
         )
         games.screen.add(self.depth_txt)
