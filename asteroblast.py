@@ -14,6 +14,8 @@ games.init(
 # Some useful globals.
 WINDOW_WIDTH = games.screen.width
 WINDOW_HEIGHT = games.screen.height
+SCREEN_WIDTH_CENTER = WINDOW_WIDTH/2
+SCREEN_HEIGHT_CENTER = WINDOW_HEIGHT/2
 
 
 class ScreenWrapper(games.Sprite):
@@ -240,11 +242,14 @@ class Spacecraft(Bumper):
         )
 
         self.blaster_cooldown = 0
+        self.coordinates = games.Text(
+            value=None,
+            size=0,
+            color=color.gray
+        )
 
     # Check for important object events in real time.
     def update(self):
-        print(self.dx, self.dy)
-
         # Inherit wrapping mechanics and collision detection.
         super(Spacecraft, self).update()
 
@@ -299,6 +304,22 @@ class Spacecraft(Bumper):
         if self.blaster_cooldown:
             self.blaster_cooldown -= 1
 
+        # Clear coordinates display (keep it updated).
+        games.screen.remove(self.coordinates)
+
+        # Show spacecraft coordinates.
+        self.coordinates = games.Text(
+            value=f"[ dx: {self.dx} dy: {self.dy} ]",
+            size=20,
+            color=color.gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=575,
+            is_collideable=False
+
+        )
+        games.screen.add(self.coordinates)
+
+
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
     # Basically these two lines are picking the velocity factor between:
@@ -320,8 +341,6 @@ class Game(object):
     )
 
     # Set up handy constants.
-    SCREEN_WIDTH_CENTER = WINDOW_WIDTH/2
-    SCREEN_HEIGHT_CENTER = WINDOW_HEIGHT/2
     DEPTH_TEXT_HEIGHT = 25
 
 
@@ -332,16 +351,16 @@ class Game(object):
 
         # Depth level text sprite init.
         self.depth_txt = games.Text(
-            value=f"Depth: {self.depth}",
-            size=25,
+            value=None,
+            size=0,
             color=color.gray
         )
 
         # Construct spacecraft object
         # and add it to the screen.
         self.spacecraft = Spacecraft(
-            x=Game.SCREEN_WIDTH_CENTER,
-            y=Game.SCREEN_HEIGHT_CENTER
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER
         )
         games.screen.add(self.spacecraft)
 
@@ -371,7 +390,7 @@ class Game(object):
             value=f"Depth: {self.depth}",
             size=25,
             color=color.gray,
-            x=Game.SCREEN_WIDTH_CENTER,
+            x=SCREEN_WIDTH_CENTER,
             y=Game.DEPTH_TEXT_HEIGHT,
             is_collideable=False
         )
