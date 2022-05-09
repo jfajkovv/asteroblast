@@ -2,7 +2,7 @@
 import math
 import random
 # https://pythonhosted.org/SuperWires/index.html
-from superwires import games
+from superwires import games, color
 
 # Create window and get access to games instructions subset.
 games.init(
@@ -322,12 +322,20 @@ class Game(object):
     # Set up handy constants.
     SCREEN_WIDTH_CENTER = WINDOW_WIDTH/2
     SCREEN_HEIGHT_CENTER = WINDOW_HEIGHT/2
+    DEPTH_TEXT_HEIGHT = 25
 
 
     def __init__(self):
         # This defines level number and it's difficulty.
         # Look up advance() below for details.
         self.depth = 0
+
+        # Depth level text sprite init.
+        self.depth_txt = games.Text(
+            value=f"Depth: {self.depth}",
+            size=25,
+            color=color.gray
+        )
 
         # Construct spacecraft object
         # and add it to the screen.
@@ -354,6 +362,21 @@ class Game(object):
         # Increment the level depth and it's difficulty.
         # Player gets more debris to shoot with each level iteration.
         self.depth += 1
+
+        # Clear old depth number from the screen.
+        games.screen.remove(self.depth_txt)
+
+        # Update and display level number on the screen.
+        self.depth_txt = games.Text(
+            value=f"Depth: {self.depth}",
+            size=25,
+            color=color.gray,
+            x=Game.SCREEN_WIDTH_CENTER,
+            y=Game.DEPTH_TEXT_HEIGHT,
+            is_collideable=False
+        )
+        games.screen.add(self.depth_txt)
+
         for _ in range(self.depth):
             # Avoid spawning debris on the ship or close to it.
             MIN_SPAWN_BUFFER_PX = 300
