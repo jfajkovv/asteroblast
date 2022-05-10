@@ -179,6 +179,47 @@ class Debris(ScreenWrapper):
             self.game.advance()
 
 
+class ToughDebris(Debris):
+
+    # Asteroids classification constants.
+    SMALL = 1
+    MEDIUM = 2
+    BIG = 3
+
+    # Load assets.
+    TOUGH_ASTEROID_IMAGES = {
+        SMALL: games.load_image('./assets/graphics/tough-asteroid-small.png'),
+        MEDIUM: games.load_image('./assets/graphics/tough-asteroid-medium.png'),
+        BIG: games.load_image('./assets/graphics/tough-asteroid-big.png')
+    }
+
+    def __init__(self, game, x, y, size):
+        # Appeal to the ScreenWrapper constructor in order
+        # to set up the image and call upon coordinates.
+        super(ScreenWrapper, self).__init__(
+            image=ToughDebris.TOUGH_ASTEROID_IMAGES[size],
+            x=x,
+            y=y,
+            # Just like w/ normal debris -- set up speed randomly:
+            # Debris.VELOCITY factor gets multiplied by a random number
+            # from range of 0-0.9(9) for diversity. Next, it's getting
+            # multiplied by either -1 or 1 which determines it's positive/negative
+            # coordinates feed -- direction of movement.
+            # The equation ends divided by size of the object --
+            # smaller ones tend to be speedier.
+            dx = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            dy = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            # Set up debris angle randomly for variety.
+            angle=random.randrange(361)
+        )
+
+        self.size = size
+        self.game = game
+
+        Debris.belt += 1
+        print(Debris.belt)
+
+
 class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
@@ -425,13 +466,22 @@ class Game(object):
             x_shift = self.spacecraft.x + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
             y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
-            new_debris = Debris(
-                game=self,
-                x=x_shift,
-                y=y_shift,
-                size=random.randint(Debris.MEDIUM, Debris.BIG)
+#            if random.randrange(2) == 0:
+#                new_debris = Debris(
+#                    game=self,
+#                    x=x_shift,
+#                    y=y_shift,
+#                    size=random.randint(Debris.MEDIUM, Debris.BIG)
+#                )
+#                games.screen.add(new_debris)
+#            else:
+            new_tough_debris = ToughDebris(
+                    game=self,
+                    x=x_shift,
+                    y=y_shift,
+                    size=random.randint(Debris.MEDIUM, Debris.BIG),
             )
-            games.screen.add(new_debris)
+            games.screen.add(new_tough_debris)
 
 
 def main():
