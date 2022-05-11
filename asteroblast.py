@@ -123,7 +123,7 @@ class Debris(ScreenWrapper):
     }
 
     # Class var for debris count.
-    belt = 0
+    #belt = 0
 
     def __init__(self, game, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
@@ -148,10 +148,12 @@ class Debris(ScreenWrapper):
         self.size = size
         self.game = game
 
-        Debris.belt += 1
+        #Debris.belt += 1
+        self.game.belt.append(self)
 
     def die(self):
-        Debris.belt -= 1
+        #Debris.belt -= 1
+        self.game.belt.remove(self)
 
         # Make space rocks break up until there is no smaller size.
         if self.size != Debris.SMALL:
@@ -178,7 +180,8 @@ class Debris(ScreenWrapper):
         self.game.score.value += int(30/self.size)
 
         # If there are no space rocks left...
-        if Debris.belt == 0:
+        #if Debris.belt == 0:
+        if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
             self.game.advance()
@@ -201,7 +204,7 @@ class ToughDebris(Debris):
         BIG: games.load_image('./assets/graphics/tough-asteroid-big.png')
     }
 
-    belt = 0
+    #belt = 0
 
     def __init__(self, game, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
@@ -227,22 +230,24 @@ class ToughDebris(Debris):
         self.game = game
         self.structure = 2
 
-        ToughDebris.belt += 1
+        #ToughDebris.belt += 1
+        self.game.belt.append(self)
 
     def die(self):
-        ToughDebris.belt -= 1
+        #ToughDebris.belt -= 1
+        self.game.belt.remove(self)
 
         # Make space rocks break up until there is no smaller size.
         if self.size != ToughDebris.SMALL:
             for _ in range(ToughDebris.CRASH_SPAWNS):
                 # Spawn two smaller sized asteroids in the place of the crash.
-                new_debris = ToughDebris(
+                new_tough_debris = ToughDebris(
                     game=self.game,
                     x=self.x,
                     y=self.y,
                     size=self.size-1
                 )
-                games.screen.add(new_debris)
+                games.screen.add(new_tough_debris)
 
         super(Debris, self).die()
 
@@ -257,7 +262,8 @@ class ToughDebris(Debris):
         self.game.score.value += int(30/self.size)*2
 
         # If there are no space rocks left...
-        if ToughDebris.belt == 0:
+        #if ToughDebris.belt == 0:
+        if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
             self.game.advance()
@@ -448,6 +454,9 @@ class Game(object):
             size=0,
             color=color.gray
         )
+
+        # Asteroids per level collection.
+        self.belt = []
 
         # Score and it's display.
         self.score = games.Text(
