@@ -55,6 +55,7 @@ class Bumper(ScreenWrapper):
         # Simple check if any other sprite overlaps self-object...
         if self.overlapping_sprites:
             # ... and for any such sprite -- it should destroy itself.
+            # The try-except clause serves the debris that requires multiple hits.
             try:
                 for sprite in self.overlapping_sprites:
                     sprite.structure -= 1
@@ -122,9 +123,6 @@ class Debris(ScreenWrapper):
         BIG: games.load_image('./assets/graphics/asteroid-big.png')
     }
 
-    # Class var for debris count.
-    #belt = 0
-
     def __init__(self, game, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
@@ -148,11 +146,11 @@ class Debris(ScreenWrapper):
         self.size = size
         self.game = game
 
-        #Debris.belt += 1
+        # Add new object to the Game's belt collection.
         self.game.belt.append(self)
 
     def die(self):
-        #Debris.belt -= 1
+        # Remove debris from Game's asteroid collector.
         self.game.belt.remove(self)
 
         # Make space rocks break up until there is no smaller size.
@@ -180,7 +178,6 @@ class Debris(ScreenWrapper):
         self.game.score.value += int(30/self.size)
 
         # If there are no space rocks left...
-        #if Debris.belt == 0:
         if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
@@ -203,8 +200,6 @@ class ToughDebris(Debris):
         MEDIUM: games.load_image('./assets/graphics/tough-asteroid-medium.png'),
         BIG: games.load_image('./assets/graphics/tough-asteroid-big.png')
     }
-
-    #belt = 0
 
     def __init__(self, game, x, y, size):
         # Appeal to the ScreenWrapper constructor in order
@@ -230,11 +225,11 @@ class ToughDebris(Debris):
         self.game = game
         self.structure = 2
 
-        #ToughDebris.belt += 1
+        # Add new object to the Game's belt collection.
         self.game.belt.append(self)
 
     def die(self):
-        #ToughDebris.belt -= 1
+        # Remove debris from Game's asteroid collector.
         self.game.belt.remove(self)
 
         # Make space rocks break up until there is no smaller size.
@@ -262,7 +257,6 @@ class ToughDebris(Debris):
         self.game.score.value += int(30/self.size)*2
 
         # If there are no space rocks left...
-        #if ToughDebris.belt == 0:
         if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
@@ -313,8 +307,7 @@ class Blast(Bumper):
 
         # Decrement the life time of the projectile...
         self.lifetime -= 1
-        # ... and remove it from the screen if it's lifetime parameter
-        # reaches 0.
+        # ... and remove it from the screen if it's lifetime parameter reaches 0.
         if self.lifetime == 0:
             self.destroy()
 
@@ -407,7 +400,7 @@ class Spacecraft(Bumper):
         # Clear coordinates display (keep it updated).
         games.screen.remove(self.coordinates)
 
-        # Show spacecraft coordinates.
+        # Show spacecraft coordinate speedometer.
         self.coordinates = games.Text(
             value=f"[ dx: {self.dx} dy: {self.dy} ]",
             size=20,
@@ -418,7 +411,6 @@ class Spacecraft(Bumper):
 
         )
         games.screen.add(self.coordinates)
-
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
