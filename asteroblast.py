@@ -263,6 +263,84 @@ class ToughDebris(Debris):
             self.game.advance()
 
 
+class SuperToughDebris(ToughDebris):
+
+    CRASH_SPAWNS = 2
+
+    # Asteroids classification constants.
+    SMALL = 1
+    MEDIUM = 2
+    BIG = 3
+
+    # Load assets.
+    SUPER_TOUGH_ASTEROID_IMAGES = {
+        SMALL: games.load_image('./assets/graphics/super-tough-asteroid-small.png'),
+        MEDIUM: games.load_image('./assets/graphics/super-tough-asteroid-medium.png'),
+        BIG: games.load_image('./assets/graphics/super-tough-asteroid-big.png')
+    }
+
+    def __init__(self, game, x, y, size):
+        # Appeal to the ScreenWrapper constructor in order
+        # to set up the image and call upon coordinates.
+        super(ScreenWrapper, self).__init__(
+            image=SuperToughDebris.SUPER_TOUGH_ASTEROID_IMAGES[size],
+            x=x,
+            y=y,
+            # Just like w/ normal debris -- set up speed randomly:
+            # Debris.VELOCITY factor gets multiplied by a random number
+            # from range of 0-0.9(9) for diversity. Next, it's getting
+            # multiplied by either -1 or 1 which determines it's positive/negative
+            # coordinates feed -- direction of movement.
+            # The equation ends divided by size of the object --
+            # smaller ones tend to be speedier.
+            dx = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            dy = Debris.VELOCITY*random.random()*random.choice([-1, 1])/size,
+            # Set up debris angle randomly for variety.
+            angle=random.randrange(361)
+        )
+
+        self.size = size
+        self.game = game
+        self.structure = 3
+
+        # Add new object to the Game's belt collection.
+        self.game.belt.append(self)
+
+    def die(self):
+        # Remove debris from Game's asteroid collector.
+        self.game.belt.remove(self)
+
+        # Make space rocks break up until there is no smaller size.
+        if self.size != SuperToughDebris.SMALL:
+            for _ in range(SuperToughDebris.CRASH_SPAWNS):
+                # Spawn two smaller sized asteroids in the place of the crash.
+                new_super_tough_debris = SuperToughDebris(
+                    game=self.game,
+                    x=self.x,
+                    y=self.y,
+                    size=self.size-1
+                )
+                games.screen.add(new_super_tough_debris)
+
+        super(Debris, self).die()
+
+        # Add some value to the score.
+        if self.size == SuperToughDebris.BIG:
+            self.game.score.value += 3
+        elif self.size == SuperToughDebris.MEDIUM:
+            self.game.score.value += 6
+        elif self.size == SuperToughDebris.SMALL:
+            self.game.score.value += 9
+
+        self.game.score.value += int(30/self.size)*3
+
+        # If there are no space rocks left...
+        if not self.game.belt:
+            # ... appeal to the Game class and it's advance method
+            # in order to get to higher level.
+            self.game.advance()
+
+
 class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
@@ -509,22 +587,22 @@ class Game(object):
             x_shift = self.spacecraft.x + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
             y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
-            if random.randrange(2) == 0:
-                new_debris = Debris(
-                    game=self,
-                    x=x_shift,
-                    y=y_shift,
-                    size=random.randint(Debris.MEDIUM, Debris.BIG)
-                )
-                games.screen.add(new_debris)
-            else:
-                new_tough_debris = ToughDebris(
-                        game=self,
-                        x=x_shift,
-                        y=y_shift,
-                        size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
-                )
-                games.screen.add(new_tough_debris)
+#            if random.randrange(2) == 0:
+            new_super_tough_debris = SuperToughDebris(
+                game=self,
+                x=x_shift,
+                y=y_shift,
+                size=random.randint(SuperToughDebris.MEDIUM, SuperToughDebris.BIG)
+            )
+            games.screen.add(new_super_tough_debris)
+#            else:
+#                new_tough_debris = ToughDebris(
+#                        game=self,
+#                        x=x_shift,
+#                        y=y_shift,
+#                        size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
+#                )
+#                games.screen.add(new_tough_debris)
 
 
 def main():
