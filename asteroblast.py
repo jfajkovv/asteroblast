@@ -402,7 +402,7 @@ class Spacecraft(Bumper):
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
 
-    def __init__(self, x, y):
+    def __init__(self, game, x, y):
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Spacecraft, self).__init__(
@@ -412,6 +412,7 @@ class Spacecraft(Bumper):
             is_collideable=True
         )
 
+        self.game = game
         self.blaster_cooldown = 0
         self.coordinates = games.Text(
             value=None,
@@ -448,7 +449,7 @@ class Spacecraft(Bumper):
             self.dx -= Spacecraft.REVERSE_PULL_FACTOR * math.sin(math.radians(self.angle))
             self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Decelerate the ship until stillness via R KEY.
+        # Decelerate the ship until [almost] stillness via R KEY.
         if games.keyboard.is_pressed(games.K_r):
             if self.dx > 0:
                 self.dx -= Spacecraft.VELOCITY_FACTOR
@@ -489,6 +490,10 @@ class Spacecraft(Bumper):
 
         )
         games.screen.add(self.coordinates)
+
+        # Evoke help screen layer via C KEY.
+        if games.keyboard.is_pressed(games.K_c):
+            self.game.display_help()
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
@@ -543,7 +548,8 @@ class Game(object):
         # and add it to the screen.
         self.spacecraft = Spacecraft(
             x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER
+            y=SCREEN_HEIGHT_CENTER,
+            game=self
         )
         games.screen.add(self.spacecraft)
 
@@ -604,6 +610,133 @@ class Game(object):
 #                )
 #                games.screen.add(new_tough_debris)
 
+    def display_help(self):
+        Y_AXIS_ALIGNMENT = 175
+        MESSAGES_INTERSPACE = 25
+
+        y_position = Y_AXIS_ALIGNMENT + MESSAGES_INTERSPACE
+        duration = 180
+
+        title = games.Message(
+            value="asteroblast v1.0",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        h = games.Message(
+            value="[ h ] -- show this message",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        up = games.Message(
+            value="[ up ] -- accelerate",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        down = games.Message(
+            value="[ down  ] -- deccelerate",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        left = games.Message(
+            value="[ left ] -- turn left",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        right = games.Message(
+            value="[ right ] -- turn right",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        shoot = games.Message(
+            value="[ space / f ] -- shoot",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        r = games.Message(
+            value="[ r ] -- stop the craft",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        c = games.Message(
+            value="[ c ] -- change controls",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 15
+
+        help_items = [title, h, up, down, left, right, shoot, r, c]
+        for item in help_items:
+            games.screen.add(item)
 
 def main():
     # Create Game instance.
