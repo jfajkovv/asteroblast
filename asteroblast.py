@@ -3,6 +3,7 @@ import math
 import random
 # https://pythonhosted.org/SuperWires/index.html
 from superwires import games, color
+from time import sleep
 
 # Create window and get access to games instructions subset.
 games.init(
@@ -487,7 +488,6 @@ class Spacecraft(Bumper):
             x=SCREEN_WIDTH_CENTER,
             y=575,
             is_collideable=False
-
         )
         games.screen.add(self.coordinates)
 
@@ -506,6 +506,54 @@ class Spacecraft(Bumper):
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
 
+class GameStarter(games.Sprite):
+
+    def __init__(self):
+        super(GameStarter, self).__init__(
+            image=Blast.BLAST_IMG,
+            is_collideable=False
+        )
+
+        self.start_key = games.Text(
+            value="[ press S to start ]",
+            size=60,
+            color=color.gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER,
+            is_collideable=False
+        )
+        games.screen.add(self.start_key)
+
+    def update(self):
+        if games.keyboard.is_pressed(games.K_s):
+#            space_pressed = games.Message(
+#                value="SPACE pressed",
+#                size=30,
+#                color=color.light_gray,
+#                x=SCREEN_WIDTH_CENTER,
+#                y=SCREEN_HEIGHT_CENTER + 50,
+#                lifetime=120,
+#                is_collideable=False,
+#                after_death=None
+#            )
+#            games.screen.add(space_pressed)
+
+            games.screen.remove(self.start_key)
+            self.destroy()
+
+            # Create Game instance.
+            asteroblast = Game()
+            # Defend these skies!
+            asteroblast.play()
+
+
+class StartScreen(object):
+
+    def __init__(self):
+        self.starter = GameStarter()
+        games.screen.add(self.starter)
+
+
 class Game(object):
     """Gameplay core mechanics."""
 
@@ -519,6 +567,9 @@ class Game(object):
     TEXT_HEIGHT = 25
 
     def __init__(self):
+        # View starter help screen.
+        self.display_help()
+
         # This defines level number and it's difficulty.
         # Look up advance() below for details.
         self.depth = 0
@@ -553,7 +604,6 @@ class Game(object):
         )
         games.screen.add(self.spacecraft)
 
-
     # Allow the player to perform an actual gameplay -- level by level.
     def play(self):
         # Set up chosen background.
@@ -561,10 +611,6 @@ class Game(object):
 
         # Start particular level.
         self.advance()
-
-        # Run the actual game -- keep the screen running
-        # by evoking the main loop.
-        games.screen.mainloop()
 
     def advance(self):
         # Increment the level depth and it's difficulty.
@@ -594,13 +640,13 @@ class Game(object):
             y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
 #            if random.randrange(2) == 0:
-            new_super_tough_debris = SuperToughDebris(
+            new_debris = Debris(
                 game=self,
                 x=x_shift,
                 y=y_shift,
-                size=random.randint(SuperToughDebris.MEDIUM, SuperToughDebris.BIG)
+                size=random.randint(Debris.MEDIUM, Debris.BIG)
             )
-            games.screen.add(new_super_tough_debris)
+            games.screen.add(new_debris)
 #            else:
 #                new_tough_debris = ToughDebris(
 #                        game=self,
@@ -611,7 +657,7 @@ class Game(object):
 #                games.screen.add(new_tough_debris)
 
     def display_help(self):
-        Y_AXIS_ALIGNMENT = 175
+        Y_AXIS_ALIGNMENT = 320
         MESSAGES_INTERSPACE = 25
 
         y_position = Y_AXIS_ALIGNMENT + MESSAGES_INTERSPACE
@@ -628,7 +674,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         h = games.Message(
             value="[ h ] -- show this message",
@@ -641,7 +687,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         up = games.Message(
             value="[ up ] -- accelerate",
@@ -654,7 +700,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         down = games.Message(
             value="[ down  ] -- deccelerate",
@@ -667,7 +713,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         left = games.Message(
             value="[ left ] -- turn left",
@@ -680,7 +726,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         right = games.Message(
             value="[ right ] -- turn right",
@@ -693,7 +739,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         shoot = games.Message(
             value="[ space / f ] -- shoot",
@@ -706,7 +752,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         r = games.Message(
             value="[ r ] -- stop the craft",
@@ -719,7 +765,7 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
         c = games.Message(
             value="[ c ] -- change controls",
@@ -732,17 +778,32 @@ class Game(object):
             after_death=None
         )
         y_position += MESSAGES_INTERSPACE
-        duration += 15
+        duration += 2
 
-        help_items = [title, h, up, down, left, right, shoot, r, c]
+        esc = games.Message(
+            value="[ ESC ] -- quit",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 2
+
+        help_items = [title, h, up, down, left, right, shoot, r, c, esc]
         for item in help_items:
             games.screen.add(item)
 
+
 def main():
-    # Create Game instance.
-    asteroblast = Game()
-    # Defend these skies!
-    asteroblast.play()
+    intro = StartScreen()
+
+    # Run the actual game -- keep the screen running
+    # by evoking the main loop.
+    games.screen.mainloop()
 
 
 if __name__ == "__main__":
