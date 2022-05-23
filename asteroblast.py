@@ -107,10 +107,10 @@ class Explosion(games.Animation):
         )
 
 class Debris(ScreenWrapper):
-    """Space rock -- enemy of the game.An asteroid to be shot."""
+    """Space rock -- enemy in the gameplay. An asteroid to be shot."""
 
-    VELOCITY = 3
-    CRASH_SPAWNS = 2
+    VELOCITY = 3  # The actual speed factor.
+    CRASH_SPAWNS = 2  # Number of pieces to spawn after crash.
 
     # Asteroids classification constants.
     SMALL = 1
@@ -186,9 +186,10 @@ class Debris(ScreenWrapper):
 
 
 class ToughDebris(Debris):
+    """Space rock -- enemy in the gameplay. An asteroid to be shot. Tough version."""
 
-    VELOCITY = 3
-    CRASH_SPAWNS = 2
+    VELOCITY = 3  # The actual speed factor.
+    CRASH_SPAWNS = 2  # Number of pieces to spawn after crash.
 
     # Asteroids classification constants.
     SMALL = 1
@@ -265,8 +266,10 @@ class ToughDebris(Debris):
 
 
 class SuperToughDebris(ToughDebris):
+    """Space rock -- enemy in the gameplay. An asteroid to be shot. Super tough version."""
 
-    CRASH_SPAWNS = 2
+    VELOCITY = 3  # The actual speed factor.
+    CRASH_SPAWNS = 2  # Number of pieces to spawn after crash.
 
     # Asteroids classification constants.
     SMALL = 1
@@ -345,10 +348,9 @@ class SuperToughDebris(ToughDebris):
 class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
-    SPAWN_BUFFER_PX = 50
-    VELOCITY_FACTOR = 10
-    BLAST_LIFETIME = 30
-    BLAST_DELAY = 50
+    SPAWN_BUFFER_PX = 50  # Spawn distance from the ship.
+    VELOCITY_FACTOR = 10  # An actual speed factor.
+    BLAST_LIFETIME = 30  # Blast lifetime duration.
 
     # Load assets.
     BLAST_IMG = games.load_image("./assets/graphics/blast-ball.png")
@@ -394,11 +396,11 @@ class Blast(Bumper):
 class Spacecraft(Bumper):
     """An actual player."""
 
-    TURN_FACTOR = 5
-    VELOCITY_FACTOR = 0.1
-    VELOCITY_MAX = 4
-    REVERSE_PULL_FACTOR = 0.07
-    BLASTER_DELAY = 30
+    TURN_FACTOR = 5  # Turn angle factor.
+    VELOCITY_FACTOR = 0.1  # An actual speed factor.
+    VELOCITY_MAX = 4  # Top speed limit.
+    REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
+    BLASTER_DELAY = 30  # Time unit until next shot.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
@@ -450,8 +452,8 @@ class Spacecraft(Bumper):
             self.dx -= Spacecraft.REVERSE_PULL_FACTOR * math.sin(math.radians(self.angle))
             self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Decelerate the ship until [almost] stillness via R KEY.
-        if games.keyboard.is_pressed(games.K_r):
+        # Decelerate the ship until [almost] stillness via S KEY.
+        if games.keyboard.is_pressed(games.K_s):
             if self.dx > 0:
                 self.dx -= Spacecraft.VELOCITY_FACTOR
             elif self.dx < 0:
@@ -491,8 +493,8 @@ class Spacecraft(Bumper):
         )
         games.screen.add(self.coordinates)
 
-        # Evoke help screen layer via C KEY.
-        if games.keyboard.is_pressed(games.K_c):
+        # Evoke help screen layer via H KEY.
+        if games.keyboard.is_pressed(games.K_h):
             self.game.display_help()
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
@@ -506,55 +508,7 @@ class Spacecraft(Bumper):
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
 
-class GameStarter(games.Sprite):
-
-    def __init__(self):
-        super(GameStarter, self).__init__(
-            image=Blast.BLAST_IMG,
-            is_collideable=False
-        )
-
-        self.start_key = games.Text(
-            value="[ press S to start ]",
-            size=60,
-            color=color.gray,
-            x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER,
-            is_collideable=False
-        )
-        games.screen.add(self.start_key)
-
-    def update(self):
-        if games.keyboard.is_pressed(games.K_s):
-#            space_pressed = games.Message(
-#                value="SPACE pressed",
-#                size=30,
-#                color=color.light_gray,
-#                x=SCREEN_WIDTH_CENTER,
-#                y=SCREEN_HEIGHT_CENTER + 50,
-#                lifetime=120,
-#                is_collideable=False,
-#                after_death=None
-#            )
-#            games.screen.add(space_pressed)
-
-            games.screen.remove(self.start_key)
-            self.destroy()
-
-            # Create Game instance.
-            asteroblast = Game()
-            # Defend these skies!
-            asteroblast.play()
-
-
-class StartScreen(object):
-
-    def __init__(self):
-        self.starter = GameStarter()
-        games.screen.add(self.starter)
-
-
-class Game(object):
+class Gameplay(object):
     """Gameplay core mechanics."""
 
     # Load assets.
@@ -607,11 +561,12 @@ class Game(object):
     # Allow the player to perform an actual gameplay -- level by level.
     def play(self):
         # Set up chosen background.
-        games.screen.background = Game.ORBIT_IMG
+        games.screen.background = Gameplay.ORBIT_IMG
 
         # Start particular level.
         self.advance()
 
+    # Proceed to the next level.
     def advance(self):
         # Increment the level depth and it's difficulty.
         # Player gets more debris to shoot with each level iteration.
@@ -626,7 +581,7 @@ class Game(object):
             size=25,
             color=color.gray,
             x=SCREEN_WIDTH_CENTER,
-            y=Game.TEXT_HEIGHT,
+            y=Gameplay.TEXT_HEIGHT,
             is_collideable=False
         )
         games.screen.add(self.depth_txt)
@@ -656,6 +611,7 @@ class Game(object):
 #                )
 #                games.screen.add(new_tough_debris)
 
+    # Show help screen.
     def display_help(self):
         Y_AXIS_ALIGNMENT = 320
         MESSAGES_INTERSPACE = 25
@@ -663,7 +619,7 @@ class Game(object):
         y_position = Y_AXIS_ALIGNMENT + MESSAGES_INTERSPACE
         duration = 180
 
-        title = games.Message(
+        title_msg = games.Message(
             value="asteroblast v1.0",
             size=25,
             color=color.light_gray,
@@ -676,8 +632,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        h = games.Message(
-            value="[ h ] -- show this message",
+        h_msg = games.Message(
+            value="[h] -- show this message",
             size=25,
             color=color.light_gray,
             left=25,
@@ -689,8 +645,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        up = games.Message(
-            value="[ up ] -- accelerate",
+        up_msg = games.Message(
+            value="[up] -- accelerate",
             size=25,
             color=color.light_gray,
             left=25,
@@ -702,8 +658,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        down = games.Message(
-            value="[ down  ] -- deccelerate",
+        down_msg = games.Message(
+            value="[down] -- deccelerate",
             size=25,
             color=color.light_gray,
             left=25,
@@ -715,8 +671,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        left = games.Message(
-            value="[ left ] -- turn left",
+        left_msg = games.Message(
+            value="[left] -- turn left",
             size=25,
             color=color.light_gray,
             left=25,
@@ -728,8 +684,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        right = games.Message(
-            value="[ right ] -- turn right",
+        right_msg = games.Message(
+            value="[right] -- turn right",
             size=25,
             color=color.light_gray,
             left=25,
@@ -741,8 +697,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        shoot = games.Message(
-            value="[ space / f ] -- shoot",
+        shoot_msg = games.Message(
+            value="[space] / [f] -- shoot",
             size=25,
             color=color.light_gray,
             left=25,
@@ -754,8 +710,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        r = games.Message(
-            value="[ r ] -- stop the craft",
+        r_msg = games.Message(
+            value="[s] -- stop the craft",
             size=25,
             color=color.light_gray,
             left=25,
@@ -767,8 +723,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        c = games.Message(
-            value="[ c ] -- change controls",
+        c_msg = games.Message(
+            value="[c] -- change controls",
             size=25,
             color=color.light_gray,
             left=25,
@@ -780,8 +736,8 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        esc = games.Message(
-            value="[ ESC ] -- quit",
+        esc_msg = games.Message(
+            value="[ESC] -- quit",
             size=25,
             color=color.light_gray,
             left=25,
@@ -793,14 +749,79 @@ class Game(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        help_items = [title, h, up, down, left, right, shoot, r, c, esc]
+        help_items = [title_msg, h_msg, up_msg, down_msg, left_msg, right_msg, shoot_msg, r_msg, c_msg, esc_msg]
         for item in help_items:
             games.screen.add(item)
 
 
-def main():
-    intro = StartScreen()
+class StartScreen(games.Sprite):
+    """Title screen with game name and prompt."""
 
+    def __init__(self):
+        # The image parameter is necessary for games.Sprite creation and usage,
+        # but it's totally unnecessary in this context.
+        super(StartScreen, self).__init__(
+            image=Blast.BLAST_IMG,
+            is_collideable=False
+        )
+
+        games.screen.background = Gameplay.ORBIT_IMG
+
+        self.logo_txt = games.Text(
+            value="asteroblast",
+            size=40,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER-50,
+            is_collideable=False
+        )
+        games.screen.add(self.logo_txt)
+
+        self.start_txt = games.Text(
+            value="press [s] to start",
+            size=60,
+            color=color.gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER,
+            is_collideable=False
+        )
+        games.screen.add(self.start_txt)
+
+        self.help_text = games.Text(
+            value="press [h] while in game to view help and controls",
+            size=30,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER+100,
+            is_collideable=False
+        )
+        games.screen.add(self.help_text)
+
+    # Check for important object events in real time.
+    def update(self):
+        if games.keyboard.is_pressed(games.K_s):
+            games.screen.remove(self.logo_txt)
+            games.screen.remove(self.start_txt)
+            games.screen.remove(self.help_text)
+
+            self.destroy()
+
+            # Create Game instance.
+            asteroblast = Gameplay()
+            # Defend these skies!
+            asteroblast.play()
+
+
+class GameStarter(object):
+    """Intro screen and gameplay wrapper."""
+
+    def __init__(self):
+        self.starter = StartScreen()
+        games.screen.add(self.starter)
+
+
+def main():
+    game = GameStarter()
     # Run the actual game -- keep the screen running
     # by evoking the main loop.
     games.screen.mainloop()
