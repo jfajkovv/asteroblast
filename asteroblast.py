@@ -345,7 +345,7 @@ class SuperToughDebris(ToughDebris):
 class Blast(Bumper):
     """A projectile. Spacecraft's blaster weapon system."""
 
-    SPAWN_BUFFER_PX = 40
+    SPAWN_BUFFER_PX = 50
     VELOCITY_FACTOR = 10
     BLAST_LIFETIME = 30
     BLAST_DELAY = 50
