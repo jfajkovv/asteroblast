@@ -507,6 +507,12 @@ class Spacecraft(Bumper):
         self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
+    def die(self):
+        # Inherit all die() functionality.
+        super(Spacecraft, self).die()
+        # Display game over screen.
+        self.game.display_game_over()
+
 
 class Gameplay(object):
     """Gameplay core mechanics."""
@@ -753,6 +759,32 @@ class Gameplay(object):
         for item in help_items:
             games.screen.add(item)
 
+    # Show game over and final score.
+    def display_game_over(self):
+        game_over_msg = games.Message(
+            value="GAME OVER",
+            size=50,
+            color=color.gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER,
+            lifetime=360,
+            is_collideable=False,
+            after_death=games.screen.quit
+        )
+        games.screen.add(game_over_msg)
+
+        final_score_msg = games.Message(
+            value=f"final score: {self.score.value}",
+            size=40,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER+50,
+            lifetime=360,
+            is_collideable=False,
+            after_death=games.screen.quit
+        )
+        games.screen.add(final_score_msg)
+
 
 class StartScreen(games.Sprite):
     """Title screen with game name and prompt."""
@@ -770,7 +802,7 @@ class StartScreen(games.Sprite):
         self.logo_txt = games.Text(
             value="asteroblast",
             size=40,
-            color=color.light_gray,
+            color=color.gray,
             x=SCREEN_WIDTH_CENTER,
             y=SCREEN_HEIGHT_CENTER-50,
             is_collideable=False
@@ -780,7 +812,7 @@ class StartScreen(games.Sprite):
         self.start_txt = games.Text(
             value="press [s] to start",
             size=60,
-            color=color.gray,
+            color=color.light_gray,
             x=SCREEN_WIDTH_CENTER,
             y=SCREEN_HEIGHT_CENTER,
             is_collideable=False
