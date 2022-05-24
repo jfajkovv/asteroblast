@@ -775,8 +775,8 @@ class Gameplay(object):
 
         final_score_msg = games.Message(
             value=f"final score: {self.score.value}",
-            size=40,
-            color=color.light_gray,
+            size=30,
+            color=color.yellow,
             x=SCREEN_WIDTH_CENTER,
             y=SCREEN_HEIGHT_CENTER+50,
             lifetime=360,
@@ -810,7 +810,7 @@ class StartScreen(games.Sprite):
         games.screen.add(self.logo_txt)
 
         self.start_txt = games.Text(
-            value="press [s] to start",
+            value="press [s]tart",
             size=60,
             color=color.light_gray,
             x=SCREEN_WIDTH_CENTER,
@@ -820,7 +820,7 @@ class StartScreen(games.Sprite):
         games.screen.add(self.start_txt)
 
         self.help_text = games.Text(
-            value="press [h] while in game to view help and controls",
+            value="you can see [h]elp chart while in game",
             size=30,
             color=color.light_gray,
             x=SCREEN_WIDTH_CENTER,
