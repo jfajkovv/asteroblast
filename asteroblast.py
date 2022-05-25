@@ -453,7 +453,7 @@ class Spacecraft(Bumper):
             self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
 
         # Decelerate the ship until [almost] stillness via S KEY.
-        if games.keyboard.is_pressed(games.K_s):
+        if games.keyboard.is_pressed(games.K_r):
             if self.dx > 0:
                 self.dx -= Spacecraft.VELOCITY_FACTOR
             elif self.dx < 0:
@@ -638,7 +638,7 @@ class Gameplay(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        h_msg = games.Message(
+        help_msg = games.Message(
             value="[h] -- show this message",
             size=25,
             color=color.light_gray,
@@ -716,21 +716,8 @@ class Gameplay(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        r_msg = games.Message(
-            value="[s] -- stop the craft",
-            size=25,
-            color=color.light_gray,
-            left=25,
-            y=y_position,
-            lifetime=duration,
-            is_collideable=False,
-            after_death=None
-        )
-        y_position += MESSAGES_INTERSPACE
-        duration += 2
-
-        c_msg = games.Message(
-            value="[c] -- change controls",
+        stop_msg = games.Message(
+            value="[r] -- stop the craft",
             size=25,
             color=color.light_gray,
             left=25,
@@ -755,7 +742,7 @@ class Gameplay(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        help_items = [title_msg, h_msg, up_msg, down_msg, left_msg, right_msg, shoot_msg, r_msg, c_msg, esc_msg]
+        help_items = [title_msg, help_msg, up_msg, down_msg, left_msg, right_msg, shoot_msg, stop_msg, esc_msg]
         for item in help_items:
             games.screen.add(item)
 
@@ -810,7 +797,7 @@ class StartScreen(games.Sprite):
         games.screen.add(self.logo_txt)
 
         self.start_txt = games.Text(
-            value="press [s]tart",
+            value="[s]tart",
             size=60,
             color=color.light_gray,
             x=SCREEN_WIDTH_CENTER,
