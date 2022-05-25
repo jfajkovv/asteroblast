@@ -363,7 +363,7 @@ class Blast(Bumper):
         y = craft_y + Blast.SPAWN_BUFFER_PX * -math.cos(math.radians(craft_angle))
 
         # Projectile shall fly freely onwards from shooting spot.
-        # Again, the movement calculation is along the x, y coordinate system -
+        # Again, the movement calculation is along the x, y coordinate system --
         # crunched similarly to the Spaceship positioning method.
         dx = Blast.VELOCITY_FACTOR * math.sin(math.radians(craft_angle))
         dy = Blast.VELOCITY_FACTOR * -math.cos(math.radians(craft_angle))
@@ -393,6 +393,21 @@ class Blast(Bumper):
             self.destroy()
 
 
+class BlasterSight(games.Sprite):
+    """Spacecraft's aim assistance."""
+
+    # Load assets.
+    IMG = games.load_image("./assets/graphics/tough-asteroid-small.png")
+
+    def __init__(self, craft_x, craft_y, craft_angle):
+        # Appeal to the games.Sprite constructor in order
+        # to set up the image and call upon coordinates.
+        super(BlasterSight, self).__init__(
+            image=BlasterSight.IMG,
+            is_collideable=False
+        )
+
+
 class Spacecraft(Bumper):
     """An actual player."""
 
@@ -401,12 +416,13 @@ class Spacecraft(Bumper):
     VELOCITY_MAX = 4  # Top speed limit.
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
     BLASTER_DELAY = 30  # Time unit until next shot.
+    SIGHT_VIEW_BUFFER = 150  # Blaster sight display distance from the craft.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
 
     def __init__(self, game, x, y):
-        # Appeal to the ScreenWrapper constructor in order
+        # Appeal to the Bumper constructor in order
         # to set up the image and call upon coordinates.
         super(Spacecraft, self).__init__(
             image=Spacecraft.SPACECRAFT_IMG,
@@ -422,6 +438,9 @@ class Spacecraft(Bumper):
             size=0,
             color=color.gray
         )
+
+        self.sight = BlasterSight(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
+        games.screen.add(self.sight)
 
     # Check for important object events in real time.
     def update(self):
@@ -496,6 +515,11 @@ class Spacecraft(Bumper):
         # Evoke help screen layer via H KEY.
         if games.keyboard.is_pressed(games.K_h):
             self.game.display_help()
+
+        # Calibrate sight assistance so it moves with the craft.
+        self.sight.angle = self.angle
+        self.sight.x = self.x + Spacecraft.SIGHT_VIEW_BUFFER * math.sin(math.radians(self.angle))
+        self.sight.y = self.y + Spacecraft.SIGHT_VIEW_BUFFER * -math.cos(math.radians(self.angle))
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
