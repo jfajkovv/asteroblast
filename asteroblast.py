@@ -535,7 +535,7 @@ class Spacecraft(Bumper):
         # Inherit all die() functionality.
         super(Spacecraft, self).die()
         # Remove viewfinder from the screen.
-        self
+        games.screen.remove(self.viewfinder)
         # Display game over screen.
         self.game.display_game_over()
 
