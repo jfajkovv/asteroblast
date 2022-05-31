@@ -397,7 +397,7 @@ class BlasterViewfinder(games.Sprite):
     """Spacecraft's aim assistance."""
 
     # Load assets.
-    IMG = games.load_image("./assets/graphics/tough-asteroid-small.png")
+    IMG = games.load_image("./assets/graphics/viewfinder-gray.png")
 
     def __init__(self, craft_x, craft_y, craft_angle):
         # Appeal to the games.Sprite constructor in order
