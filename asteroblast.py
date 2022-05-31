@@ -416,7 +416,7 @@ class Spacecraft(Bumper):
     VELOCITY_MAX = 4  # Top speed limit.
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
     BLASTER_DELAY = 30  # Time unit until next shot.
-    VIEWFINDER_VIEW_BUFFER = 150  # Blaster viewfinder display distance from the craft.
+    VIEWFINDER_DISPLAY_BUFFER = 150  # Blaster viewfinder display distance from the craft.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
@@ -518,8 +518,8 @@ class Spacecraft(Bumper):
 
         # Calibrate viewfinder assistance so it moves with the craft.
         self.viewfinder.angle = self.angle
-        self.viewfinder.x = self.x + Spacecraft.VIEWFINDER_VIEW_BUFFER * math.sin(math.radians(self.angle))
-        self.viewfinder.y = self.y + Spacecraft.VIEWFINDER_VIEW_BUFFER * -math.cos(math.radians(self.angle))
+        self.viewfinder.x = self.x + Spacecraft.VIEWFINDER_DISPLAY_BUFFER * math.sin(math.radians(self.angle))
+        self.viewfinder.y = self.y + Spacecraft.VIEWFINDER_DISPLAY_BUFFER * -math.cos(math.radians(self.angle))
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
@@ -534,6 +534,8 @@ class Spacecraft(Bumper):
     def die(self):
         # Inherit all die() functionality.
         super(Spacecraft, self).die()
+        # Remove viewfinder from the screen.
+        self
         # Display game over screen.
         self.game.display_game_over()
 
