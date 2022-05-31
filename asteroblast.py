@@ -393,7 +393,7 @@ class Blast(Bumper):
             self.destroy()
 
 
-class BlasterSight(games.Sprite):
+class BlasterViewfinder(games.Sprite):
     """Spacecraft's aim assistance."""
 
     # Load assets.
@@ -402,8 +402,8 @@ class BlasterSight(games.Sprite):
     def __init__(self, craft_x, craft_y, craft_angle):
         # Appeal to the games.Sprite constructor in order
         # to set up the image and call upon coordinates.
-        super(BlasterSight, self).__init__(
-            image=BlasterSight.IMG,
+        super(BlasterViewfinder, self).__init__(
+            image=BlasterViewfinder.IMG,
             is_collideable=False
         )
 
@@ -416,7 +416,7 @@ class Spacecraft(Bumper):
     VELOCITY_MAX = 4  # Top speed limit.
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
     BLASTER_DELAY = 30  # Time unit until next shot.
-    SIGHT_VIEW_BUFFER = 150  # Blaster sight display distance from the craft.
+    VIEWFINDER_VIEW_BUFFER = 150  # Blaster viewfinder display distance from the craft.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
@@ -439,8 +439,8 @@ class Spacecraft(Bumper):
             color=color.gray
         )
 
-        self.sight = BlasterSight(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
-        games.screen.add(self.sight)
+        self.viewfinder = BlasterViewfinder(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
+        games.screen.add(self.viewfinder)
 
     # Check for important object events in real time.
     def update(self):
@@ -516,10 +516,10 @@ class Spacecraft(Bumper):
         if games.keyboard.is_pressed(games.K_h):
             self.game.display_help()
 
-        # Calibrate sight assistance so it moves with the craft.
-        self.sight.angle = self.angle
-        self.sight.x = self.x + Spacecraft.SIGHT_VIEW_BUFFER * math.sin(math.radians(self.angle))
-        self.sight.y = self.y + Spacecraft.SIGHT_VIEW_BUFFER * -math.cos(math.radians(self.angle))
+        # Calibrate viewfinder assistance so it moves with the craft.
+        self.viewfinder.angle = self.angle
+        self.viewfinder.x = self.x + Spacecraft.VIEWFINDER_VIEW_BUFFER * math.sin(math.radians(self.angle))
+        self.viewfinder.y = self.y + Spacecraft.VIEWFINDER_VIEW_BUFFER * -math.cos(math.radians(self.angle))
 
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
