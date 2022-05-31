@@ -417,6 +417,7 @@ class Spacecraft(Bumper):
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
     BLASTER_DELAY = 30  # Time unit until next shot.
     VIEWFINDER_DISPLAY_BUFFER = 150  # Blaster viewfinder display distance from the craft.
+    VIEWFINDER_DISPLAY_DELAY = 10  # Time unit to slow down viewfinder toggle.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
@@ -439,8 +440,9 @@ class Spacecraft(Bumper):
             color=color.gray
         )
 
-        self.viewfinder = BlasterViewfinder(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
-        games.screen.add(self.viewfinder)
+        self.show_viewfinder()
+        self.viewfinder_on = True
+        self.viewfinder_cooldown = 0
 
     # Check for important object events in real time.
     def update(self):
@@ -516,6 +518,22 @@ class Spacecraft(Bumper):
         if games.keyboard.is_pressed(games.K_h):
             self.game.display_help()
 
+        # Toggle viewfinder on/off.
+        if games.keyboard.is_pressed(games.K_v) and self.viewfinder_cooldown == 0:
+            if self.viewfinder_on:
+                self.remove_viewfinder()
+                self.viewfinder_on = False
+            else:
+                self.show_viewfinder()
+                self.viewfinder_on = True
+
+            self.viewfinder_cooldown = Spacecraft.VIEWFINDER_DISPLAY_DELAY
+
+        # Mainloop reacts too quickly, so this is for slowing down
+        # game's reaction to viewfinder toggle key.
+        if self.viewfinder_cooldown:
+            self.viewfinder_cooldown -= 1
+
         # Calibrate viewfinder assistance so it moves with the craft.
         self.viewfinder.angle = self.angle
         self.viewfinder.x = self.x + Spacecraft.VIEWFINDER_DISPLAY_BUFFER * math.sin(math.radians(self.angle))
@@ -531,11 +549,18 @@ class Spacecraft(Bumper):
         self.dx = min(max(self.dx, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
         self.dy = min(max(self.dy, -Spacecraft.VELOCITY_MAX), Spacecraft.VELOCITY_MAX)
 
+    def show_viewfinder(self):
+        self.viewfinder = BlasterViewfinder(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
+        games.screen.add(self.viewfinder)
+
+    def remove_viewfinder(self):
+        games.screen.remove(self.viewfinder)
+
     def die(self):
         # Inherit all die() functionality.
         super(Spacecraft, self).die()
         # Remove viewfinder from the screen.
-        games.screen.remove(self.viewfinder)
+        self.remove_viewfinder()
         # Display game over screen.
         self.game.display_game_over()
 
@@ -742,6 +767,19 @@ class Gameplay(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
+        viewfinder_msg = games.Message(
+            value="[v] -- toggle viewfinder on/off",
+            size=25,
+            color=color.light_gray,
+            left=25,
+            y=y_position,
+            lifetime=duration,
+            is_collideable=False,
+            after_death=None
+        )
+        y_position += MESSAGES_INTERSPACE
+        duration += 2
+
         stop_msg = games.Message(
             value="[r] -- stop the craft",
             size=25,
@@ -768,7 +806,7 @@ class Gameplay(object):
         y_position += MESSAGES_INTERSPACE
         duration += 2
 
-        help_items = [title_msg, help_msg, up_msg, down_msg, left_msg, right_msg, shoot_msg, stop_msg, esc_msg]
+        help_items = [title_msg, help_msg, up_msg, down_msg, left_msg, right_msg, shoot_msg, viewfinder_msg, stop_msg, esc_msg]
         for item in help_items:
             games.screen.add(item)
 
