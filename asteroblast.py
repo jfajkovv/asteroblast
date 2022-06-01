@@ -113,25 +113,20 @@ class SpacecraftExhaust(games.Animation):
     # Load assets.
     ANIMATION_IMGS = [
         "./assets/graphics/exhaust-1.png",
-        #"./assets/graphics/exhaust-2.png",
-        #"./assets/graphics/exhaust-3.png",
-        #"./assets/graphics/exhaust-4.png",
-        #"./assets/graphics/exhaust-5.png",
-        #"./assets/graphics/exhaust-6.png"
+        "./assets/graphics/exhaust-2.png",
+        "./assets/graphics/exhaust-3.png"
     ]
 
     def __init__(self, craft_x, craft_y, craft_angle, ship_x_vel, ship_y_vel):
         # Object image representation shall spawn itself at the spacecraft.
-        x = craft_x #* math.sin(math.radians(craft_angle))
-        y = craft_y #* -math.cos(math.radians(craft_angle))
+        x = craft_x
+        y = craft_y
         angle = craft_angle
 
         # In order to create the illusion, exhaust animation shall move onwards
         # just like the ship itself.
-        # Again, the movement calculation is along the x, y coordinate system --
-        # crunched similarly to the Spaceship positioning method.
-        dx = ship_x_vel * math.sin(math.radians(craft_angle))
-        dy = ship_y_vel * -math.cos(math.radians(craft_angle))
+        dx = ship_x_vel
+        dy = ship_y_vel
 
         # Appeal to the games.Animation constructor in order
         # to set up frames and call upon coordinates.
@@ -464,7 +459,7 @@ class Spacecraft(Bumper):
     VIEWFINDER_DISPLAY_DELAY = 10  # Time unit to slow down viewfinder toggle.
 
     # Load assets.
-    SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft.png")
+    SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-0.png")
 
     def __init__(self, game, x, y):
         # Appeal to the Bumper constructor in order
@@ -508,7 +503,7 @@ class Spacecraft(Bumper):
             # the actual angle of the sprite has to be converted from degrees to radians,
             # because superwires uses degrees and math trigonometric functions are running
             # on radians;
-            # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY.
+            # speed is incremented by the VELOCITY_FACOTR constant via UP KEY.
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
