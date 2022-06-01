@@ -106,6 +106,35 @@ class Explosion(games.Animation):
             is_collideable=False
         )
 
+
+class SpacecraftExhaust(games.Animation):
+    """Ship exhaust animation."""
+
+    # Load assets.
+    ANIMATION_IMGS = [
+        "./assets/graphics/exhaust-1.png",
+        "./assets/graphics/exhaust-2.png",
+        "./assets/graphics/exhaust-3.png",
+        "./assets/graphics/exhaust-4.png",
+        "./assets/graphics/exhaust-5.png",
+        "./assets/graphics/exhaust-6.png"
+    ]
+
+    def __init__(self):
+        # Appeal to the games.Animation constructor in order
+        # to set up frames and call upon coordinates.
+        super(SpacecraftExhaust, self).__init__(
+            images=SpacecraftExhaust.ANIMATION_IMGS,
+            x=100,
+            y=200,
+            # Configure animation FPS.
+            repeat_interval=3,
+            # Set how many times animation shall display itself.
+            n_repeats=1,
+            is_collideable=False
+        )
+
+
 class Debris(ScreenWrapper):
     """Space rock -- enemy in the gameplay. An asteroid to be shot."""
 
@@ -467,6 +496,10 @@ class Spacecraft(Bumper):
             # speed is incremented by the VELOCITY_FACOTR constant infinitely via UP KEY.
             self.dx += Spacecraft.VELOCITY_FACTOR * math.sin(math.radians(self.angle))
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
+
+            # Display exhaust animation.
+            new_exhaust_anim = SpacecraftExhaust()
+            games.screen.add(new_exhaust_anim)
 
         # Activate reverse pull via DOWN KEY.
         if games.keyboard.is_pressed(games.K_DOWN):
