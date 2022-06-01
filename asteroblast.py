@@ -113,25 +113,40 @@ class SpacecraftExhaust(games.Animation):
     # Load assets.
     ANIMATION_IMGS = [
         "./assets/graphics/exhaust-1.png",
-        "./assets/graphics/exhaust-2.png",
-        "./assets/graphics/exhaust-3.png",
-        "./assets/graphics/exhaust-4.png",
-        "./assets/graphics/exhaust-5.png",
-        "./assets/graphics/exhaust-6.png"
+        #"./assets/graphics/exhaust-2.png",
+        #"./assets/graphics/exhaust-3.png",
+        #"./assets/graphics/exhaust-4.png",
+        #"./assets/graphics/exhaust-5.png",
+        #"./assets/graphics/exhaust-6.png"
     ]
 
-    def __init__(self):
+    def __init__(self, craft_x, craft_y, craft_angle, ship_x_vel, ship_y_vel):
+        # Object image representation shall spawn itself at the spacecraft.
+        x = craft_x #* math.sin(math.radians(craft_angle))
+        y = craft_y #* -math.cos(math.radians(craft_angle))
+        angle = craft_angle
+
+        # In order to create the illusion, exhaust animation shall move onwards
+        # just like the ship itself.
+        # Again, the movement calculation is along the x, y coordinate system --
+        # crunched similarly to the Spaceship positioning method.
+        dx = ship_x_vel * math.sin(math.radians(craft_angle))
+        dy = ship_y_vel * -math.cos(math.radians(craft_angle))
+
         # Appeal to the games.Animation constructor in order
         # to set up frames and call upon coordinates.
         super(SpacecraftExhaust, self).__init__(
             images=SpacecraftExhaust.ANIMATION_IMGS,
-            x=100,
-            y=200,
+            x=x,
+            y=y,
+            angle=angle,
+            dx=dx,
+            dy=dy,
             # Configure animation FPS.
-            repeat_interval=3,
+            repeat_interval=1,
             # Set how many times animation shall display itself.
             n_repeats=1,
-            is_collideable=False
+            is_collideable=False,
         )
 
 
@@ -498,7 +513,13 @@ class Spacecraft(Bumper):
             self.dy += Spacecraft.VELOCITY_FACTOR * -math.cos(math.radians(self.angle))
 
             # Display exhaust animation.
-            new_exhaust_anim = SpacecraftExhaust()
+            new_exhaust_anim = SpacecraftExhaust(
+                craft_x=self.x,
+                craft_y=self.y,
+                craft_angle=self.angle,
+                ship_x_vel=self.dx,
+                ship_y_vel=self.dy
+            )
             games.screen.add(new_exhaust_anim)
 
         # Activate reverse pull via DOWN KEY.
