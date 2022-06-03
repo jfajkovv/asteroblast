@@ -145,51 +145,6 @@ class SpacecraftExhaust(games.Animation):
         )
 
 
-class BlastBounce(games.Animation):
-    """Projectile visual effect."""
-
-    # Load assets.
-    ANIMATION_IMGS = [
-        "./assets/graphics/blast-bounce-1.png",
-        "./assets/graphics/blast-bounce-2.png",
-        "./assets/graphics/blast-bounce-3.png",
-        "./assets/graphics/blast-bounce-4.png",
-    ]
-
-    def __init__(self, blast, blast_x, blast_y, blast_angle, blast_x_vel, blast_y_vel):
-        # Object image representation shall spawn itself at the blast.
-        x = blast_x
-        y = blast_y
-        angle = blast_angle
-
-        # In order to create the illusion, blast animation shall move onwards
-        # just like the projectile itself.
-        dx = blast_x_vel
-        dy = blast_y_vel
-
-        # Appeal to the games.Animation constructor in order
-        # to set up frames and call upon coordinates.
-        super(BlastBounce, self).__init__(
-            images=BlastBounce.ANIMATION_IMGS,
-            x=x,
-            y=y,
-            angle=angle,
-            dx=dx,
-            dy=dy,
-            # Configure animation FPS.
-            repeat_interval=5,
-            # Set how many times animation shall display itself.
-            n_repeats=1,
-            is_collideable=False,
-        )
-
-        self.blast = blast
-
-    def update(self):
-        if self.blast:
-            print('there is')
-
-
 class Debris(ScreenWrapper):
     """Space rock -- enemy in the gameplay. An asteroid to be shot."""
 
@@ -429,18 +384,23 @@ class SuperToughDebris(ToughDebris):
             self.game.advance()
 
 
-class Blast(Bumper):
-    """A projectile. Spacecraft's blaster weapon system."""
+class Blast(games.Animation, Bumper):
+    """A projectile. Spacecraft's blaster weapon system. Also has visual effect."""
 
-    SPAWN_BUFFER_PX = 50  # Spawn distance from the ship.
+    SPAWN_BUFFER_PX = 60  # Spawn distance from the ship.
     VELOCITY_FACTOR = 10  # An actual speed factor.
     BLAST_LIFETIME = 30  # Blast lifetime duration.
 
     # Load assets.
-    BLAST_IMG = games.load_image("./assets/graphics/blast-ball.png")
+    ANIMATION_IMGS = [
+        "./assets/graphics/blast-bounce-1.png",
+        "./assets/graphics/blast-bounce-2.png",
+        "./assets/graphics/blast-bounce-3.png",
+        "./assets/graphics/blast-bounce-4.png",
+    ]
 
     def __init__(self, craft_x, craft_y, craft_angle):
-        # Object image representation shall spawn itself in front of the spacecraft.
+        # Object animation representation shall spawn itself in front of the spacecraft.
         # Projectile position is calculated similarly to the Spacecraft class method.
         # The only difference is the shift in pixels by adding SPAWN_BUFFER_PX value.
         x = craft_x + Blast.SPAWN_BUFFER_PX * math.sin(math.radians(craft_angle))
@@ -456,13 +416,17 @@ class Blast(Bumper):
         # Appeal to the ScreenWrapper constructor in order
         # to set up the image and call upon coordinates.
         super(Blast, self).__init__(
-            image=Blast.BLAST_IMG,
+            images=Blast.ANIMATION_IMGS,
             x=x,
             y=y,
             angle=angle,
             dx=dx,
             dy=dy,
-            is_collideable=True
+            # Configure animation FPS.
+            repeat_interval=5,
+            # Set how many times animation shall display itself.
+            n_repeats=5,
+            is_collideable=True,
         )
 
         self.lifetime = Blast.BLAST_LIFETIME
@@ -590,16 +554,6 @@ class Spacecraft(Bumper):
             new_blast = Blast(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
             games.screen.add(new_blast)
             self.blaster_cooldown = Spacecraft.BLASTER_DELAY
-
-            new_bounce_anim = BlastBounce(
-                blast=new_blast,
-                blast_x=new_blast.x,
-                blast_y=new_blast.y,
-                blast_angle=new_blast.angle,
-                blast_x_vel=new_blast.dx,
-                blast_y_vel=new_blast.dy
-            )
-            games.screen.add(new_bounce_anim)
 
         # Wait until the blaster cools off.
         # This avoids on-screen projectile overcrowding.
