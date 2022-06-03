@@ -108,7 +108,7 @@ class Explosion(games.Animation):
 
 
 class SpacecraftExhaust(games.Animation):
-    """Ship exhaust animation."""
+    """Ship exhaust animation-overlapper."""
 
     # Load assets.
     ANIMATION_IMGS = [
@@ -461,7 +461,7 @@ class BlasterViewfinder(games.Sprite):
 class Spacecraft(Bumper):
     """An actual player."""
 
-    TURN_FACTOR = 5  # Turn angle factor.
+    TURN_FACTOR = 3  # Turn angle factor.
     VELOCITY_FACTOR = 0.1  # An actual speed factor.
     VELOCITY_MAX = 4  # Top speed limit.
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
@@ -904,7 +904,7 @@ class StartScreen(games.Sprite):
         # The image parameter is necessary for games.Sprite creation and usage,
         # but it's totally unnecessary in this context.
         super(StartScreen, self).__init__(
-            image=Blast.BLAST_IMG,
+            image=Spacecraft.SPACECRAFT_IMG,
             is_collideable=False
         )
 
