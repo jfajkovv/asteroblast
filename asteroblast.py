@@ -623,6 +623,8 @@ class Spacecraft(Bumper):
         self.remove_viewfinder()
         # Display game over screen.
         self.game.display_game_over()
+        # Display after game options.
+        self.game.display_replay()
 
 
 class Gameplay(object):
@@ -872,29 +874,47 @@ class Gameplay(object):
 
     # Show game over and final score.
     def display_game_over(self):
-        game_over_msg = games.Message(
+        game_over_msg = games.Text(
             value="GAME OVER",
             size=50,
             color=color.gray,
             x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER,
-            lifetime=360,
-            is_collideable=False,
-            after_death=games.screen.quit
+            y=SCREEN_HEIGHT_CENTER-50,
+            is_collideable=False
         )
         games.screen.add(game_over_msg)
 
-        final_score_msg = games.Message(
+        final_score_msg = games.Text(
             value=f"final score: {self.score.value}",
             size=30,
             color=color.yellow,
             x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER+50,
-            lifetime=360,
-            is_collideable=False,
-            after_death=games.screen.quit
+            y=SCREEN_HEIGHT_CENTER,
+            is_collideable=False
         )
         games.screen.add(final_score_msg)
+
+    # Show replay and quit options.
+    def display_replay(self):
+        replay_msg = games.Text(
+            value="play [a]gain",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER-150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(replay_msg)
+
+        quit_msg = games.Text(
+            value="[q]uit",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER+150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(quit_msg)
 
 
 class StartScreen(games.Sprite):
@@ -920,39 +940,58 @@ class StartScreen(games.Sprite):
         )
         games.screen.add(self.logo_txt)
 
-        self.start_txt = games.Text(
-            value="[s]tart",
-            size=60,
-            color=color.light_gray,
-            x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER,
-            is_collideable=False
-        )
-        games.screen.add(self.start_txt)
-
         self.help_text = games.Text(
             value="you can see [h]elp chart while in game",
             size=30,
             color=color.light_gray,
             x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER+100,
+            y=SCREEN_HEIGHT_CENTER,
             is_collideable=False
         )
         games.screen.add(self.help_text)
 
+        self.start_txt = games.Text(
+            value="[s]tart",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER-150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(self.start_txt)
+
+        self.quit_txt = games.Text(
+            value="[q]uit",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER+150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(self.quit_txt)
+
     # Check for important object events in real time.
     def update(self):
         if games.keyboard.is_pressed(games.K_s):
-            games.screen.remove(self.logo_txt)
-            games.screen.remove(self.start_txt)
-            games.screen.remove(self.help_text)
-
-            self.destroy()
+            self.remove_start_screen()
 
             # Create Game instance.
             asteroblast = Gameplay()
             # Defend these skies!
             asteroblast.play()
+
+        if games.keyboard.is_pressed(games.K_q):
+            self.remove_start_screen()
+
+    def remove_start_screen(self):
+        games.screen.remove(self.logo_txt)
+        games.screen.remove(self.start_txt)
+        games.screen.remove(self.help_text)
+        games.screen.remove(self.quit_txt)
+
+        self.destroy()
+
+        games.screen.quit()
 
 
 class GameStarter(object):
