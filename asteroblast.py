@@ -18,6 +18,13 @@ WINDOW_HEIGHT = games.screen.height
 SCREEN_WIDTH_CENTER = WINDOW_WIDTH/2
 SCREEN_HEIGHT_CENTER = WINDOW_HEIGHT/2
 
+# Useful global assets.
+DUMMY_PXL = games.load_image('./assets/graphics/dummy-pixel.png')
+ORBIT_BACKGROUND = games.load_image(
+    filename="./assets/graphics/orbit.png",
+    transparent=False
+)
+
 
 class ScreenWrapper(games.Sprite):
     """The screen "wrapper"."""
@@ -218,10 +225,10 @@ class Debris(ScreenWrapper):
         self.game.score.value += int(30/self.size)
 
         # If there are no space rocks left...
-        if not self.game.belt:
+#        if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
-            self.game.advance()
+#            self.game.advance()
 
 
 class ToughDebris(Debris):
@@ -298,10 +305,10 @@ class ToughDebris(Debris):
         self.game.score.value += int(30/self.size)*2
 
         # If there are no space rocks left...
-        if not self.game.belt:
+#        if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
-            self.game.advance()
+#            self.game.advance()
 
 
 class SuperToughDebris(ToughDebris):
@@ -378,10 +385,10 @@ class SuperToughDebris(ToughDebris):
         self.game.score.value += int(30/self.size)*3
 
         # If there are no space rocks left...
-        if not self.game.belt:
+#        if not self.game.belt:
             # ... appeal to the Game class and it's advance method
             # in order to get to higher level.
-            self.game.advance()
+#            self.game.advance()
 
 
 class Blast(games.Animation, Bumper):
@@ -468,6 +475,7 @@ class Spacecraft(Bumper):
     BLASTER_DELAY = 30  # Time unit until next shot.
     VIEWFINDER_DISPLAY_BUFFER = 150  # Blaster viewfinder display distance from the craft.
     VIEWFINDER_DISPLAY_DELAY = 10  # Time unit to slow down viewfinder toggle.
+    COOMETER_DISPLAY_DELAY = 15
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-0.png")
@@ -484,7 +492,7 @@ class Spacecraft(Bumper):
 
         self.game = game
         self.blaster_cooldown = 0
-        self.coordinates = games.Text(
+        self.coordinates_txt = games.Text(
             value=None,
             size=0,
             color=color.gray
@@ -493,6 +501,8 @@ class Spacecraft(Bumper):
         self.show_viewfinder()
         self.viewfinder_on = True
         self.viewfinder_cooldown = 0
+
+        self.coometer_cooldown = 0
 
     # Check for important object events in real time.
     def update(self):
@@ -560,19 +570,23 @@ class Spacecraft(Bumper):
         if self.blaster_cooldown:
             self.blaster_cooldown -= 1
 
-        # Clear coordinates display (keep it updated).
-        games.screen.remove(self.coordinates)
+        if self.coometer_cooldown == 0:
+            # Clear coordinates display (keep it updated).
+            self.remove_coordinates()
+            # Show spacecraft coordinate speedometer.
+            self.coordinates_txt = games.Text(
+                value=f"[ dx: {self.dx} dy: {self.dy} ]",
+                size=20,
+                color=color.gray,
+                x=SCREEN_WIDTH_CENTER,
+                y=575,
+                is_collideable=False
+            )
+            games.screen.add(self.coordinates_txt)
+            self.coometer_cooldown = Spacecraft.COOMETER_DISPLAY_DELAY
 
-        # Show spacecraft coordinate speedometer.
-        self.coordinates = games.Text(
-            value=f"[ dx: {self.dx} dy: {self.dy} ]",
-            size=20,
-            color=color.gray,
-            x=SCREEN_WIDTH_CENTER,
-            y=575,
-            is_collideable=False
-        )
-        games.screen.add(self.coordinates)
+        if self.coometer_cooldown:
+            self.coometer_cooldown -= 1
 
         # Evoke help screen layer via H KEY.
         if games.keyboard.is_pressed(games.K_h):
@@ -599,6 +613,12 @@ class Spacecraft(Bumper):
         self.viewfinder.x = self.x + Spacecraft.VIEWFINDER_DISPLAY_BUFFER * math.sin(math.radians(self.angle))
         self.viewfinder.y = self.y + Spacecraft.VIEWFINDER_DISPLAY_BUFFER * -math.cos(math.radians(self.angle))
 
+        # If there are no space rocks left...
+        if not self.game.belt:
+            # ... appeal to the Game class and it's advance method
+            # in order to get to higher level.
+            self.game.advance()
+
     # Velocity is regulated via update() method itself -- the craft cannot go faster
     # than value specified in VELOCITY_MAX constant.
     # Basically these two lines are picking the velocity factor between:
@@ -616,25 +636,31 @@ class Spacecraft(Bumper):
     def remove_viewfinder(self):
         games.screen.remove(self.viewfinder)
 
+    def remove_coordinates(self):
+        games.screen.remove(self.coordinates_txt)
+
+    def clear_screen_data(self):
+        # Remove gameplay components.
+        games.screen.remove(self.game.depth_txt)
+        games.screen.remove(self.game.score)
+        self.remove_viewfinder()
+        self.remove_coordinates()
+
     def die(self):
         # Inherit all die() functionality.
         super(Spacecraft, self).die()
-        # Remove viewfinder from the screen.
-        self.remove_viewfinder()
-        # Display game over screen.
-        self.game.display_game_over()
-        # Display after game options.
-        self.game.display_replay()
+        self.clear_screen_data()
+
+        ending = EndingScreen(
+            final_score=self.game.score.value,
+            reached_depth=self.game.depth,
+            debris_left=self.game.belt
+        )
+        games.screen.add(ending)
 
 
 class Gameplay(object):
     """Gameplay core mechanics."""
-
-    # Load assets.
-    ORBIT_IMG = games.load_image(
-        filename="./assets/graphics/orbit.png",
-        transparent=False
-    )
 
     # Set up handy constants.
     TEXT_HEIGHT = 25
@@ -680,19 +706,19 @@ class Gameplay(object):
     # Allow the player to perform an actual gameplay -- level by level.
     def play(self):
         # Set up chosen background.
-        games.screen.background = Gameplay.ORBIT_IMG
+        games.screen.background = ORBIT_BACKGROUND
 
         # Start particular level.
         self.advance()
 
     # Proceed to the next level.
     def advance(self):
+        # Clear old depth number from the screen.
+        games.screen.remove(self.depth_txt)
+
         # Increment the level depth and it's difficulty.
         # Player gets more debris to shoot with each level iteration.
         self.depth += 1
-
-        # Clear old depth number from the screen.
-        games.screen.remove(self.depth_txt)
 
         # Update and display level number on the screen.
         self.depth_txt = games.Text(
@@ -872,64 +898,22 @@ class Gameplay(object):
         for item in help_items:
             games.screen.add(item)
 
-    # Show game over and final score.
-    def display_game_over(self):
-        game_over_msg = games.Text(
-            value="GAME OVER",
-            size=50,
-            color=color.gray,
-            x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER-50,
-            is_collideable=False
-        )
-        games.screen.add(game_over_msg)
 
-        final_score_msg = games.Text(
-            value=f"final score: {self.score.value}",
-            size=30,
-            color=color.yellow,
-            x=SCREEN_WIDTH_CENTER,
-            y=SCREEN_HEIGHT_CENTER,
-            is_collideable=False
-        )
-        games.screen.add(final_score_msg)
-
-    # Show replay and quit options.
-    def display_replay(self):
-        replay_msg = games.Text(
-            value="play [a]gain",
-            size=35,
-            color=color.light_gray,
-            x=SCREEN_WIDTH_CENTER-150,
-            y=SCREEN_HEIGHT_CENTER+150,
-            is_collideable=False
-        )
-        games.screen.add(replay_msg)
-
-        quit_msg = games.Text(
-            value="[q]uit",
-            size=35,
-            color=color.light_gray,
-            x=SCREEN_WIDTH_CENTER+150,
-            y=SCREEN_HEIGHT_CENTER+150,
-            is_collideable=False
-        )
-        games.screen.add(quit_msg)
-
-
-class StartScreen(games.Sprite):
-    """Title screen with game name and prompt."""
+class IntroScreen(games.Sprite):
+    """Asteroblast welcome screen."""
 
     def __init__(self):
-        # The image parameter is necessary for games.Sprite creation and usage,
-        # but it's totally unnecessary in this context.
-        super(StartScreen, self).__init__(
-            image=Spacecraft.SPACECRAFT_IMG,
+        # The image parameter is necessary for games.Sprite creation,
+        # but it's totally unnecessary in such usage context.
+        super(IntroScreen, self).__init__(
+            image=DUMMY_PXL,
             is_collideable=False
         )
 
-        games.screen.background = Gameplay.ORBIT_IMG
+        # Set up chosen background.
+        games.screen.background = ORBIT_BACKGROUND
 
+        # Create and view game title.
         self.logo_txt = games.Text(
             value="asteroblast",
             size=40,
@@ -940,6 +924,7 @@ class StartScreen(games.Sprite):
         )
         games.screen.add(self.logo_txt)
 
+        # Create and view help hint key.
         self.help_text = games.Text(
             value="you can see [h]elp chart while in game",
             size=30,
@@ -950,6 +935,7 @@ class StartScreen(games.Sprite):
         )
         games.screen.add(self.help_text)
 
+        # Create and view game starter key prompt.
         self.start_txt = games.Text(
             value="[s]tart",
             size=35,
@@ -960,6 +946,7 @@ class StartScreen(games.Sprite):
         )
         games.screen.add(self.start_txt)
 
+        # Create and view game exit key prompt.
         self.quit_txt = games.Text(
             value="[q]uit",
             size=35,
@@ -972,18 +959,21 @@ class StartScreen(games.Sprite):
 
     # Check for important object events in real time.
     def update(self):
+        # S KEY starts the game (intro screen is cleared beforehand).
         if games.keyboard.is_pressed(games.K_s):
-            self.remove_start_screen()
+            self.clear_start_screen()
 
             # Create Game instance.
             asteroblast = Gameplay()
             # Defend these skies!
             asteroblast.play()
 
+        # Q simply quits the game and closes the program.
         if games.keyboard.is_pressed(games.K_q):
-            self.remove_start_screen()
+            games.screen.quit()
 
-    def remove_start_screen(self):
+    # Screen shall be cleared and dummy pixel removed before game start.
+    def clear_start_screen(self):
         games.screen.remove(self.logo_txt)
         games.screen.remove(self.start_txt)
         games.screen.remove(self.help_text)
@@ -991,19 +981,115 @@ class StartScreen(games.Sprite):
 
         self.destroy()
 
-        games.screen.quit()
+
+class EndingScreen(games.Sprite):
+    """Asteroblast replay/quit screen."""
+
+    def __init__(self, debris_left, final_score=1, reached_depth=1):
+        # The image parameter is necessary for games.Sprite creation,
+        # but it's totally unnecessary in such usage context.
+        super(EndingScreen, self).__init__(
+            image=DUMMY_PXL,
+            is_collideable=False
+        )
+
+        self.final_score = final_score
+        self.reached_depth = reached_depth
+        self.debris_left = debris_left
+
+        # Create and view game over text.
+        self.game_over_txt = games.Text(
+            value="GAME OVER",
+            size=50,
+            color=color.gray,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER-50,
+            is_collideable=False
+        )
+        games.screen.add(self.game_over_txt)
+
+        # Create and view final score.
+        self.final_score_txt = games.Text(
+            value=f"final score: {self.final_score}",
+            size=30,
+            color=color.yellow,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER,
+            is_collideable=False
+        )
+        games.screen.add(self.final_score_txt)
+
+        # Create and view reached depth.
+        self.depth_reached_txt = games.Text(
+            value=f"depth reached: {self.reached_depth}",
+            size=30,
+            color=color.yellow,
+            x=SCREEN_WIDTH_CENTER,
+            y=SCREEN_HEIGHT_CENTER+30,
+            is_collideable=False
+        )
+        games.screen.add(self.depth_reached_txt)
+
+        # Create and view play again key prompt.
+        self.replay_txt = games.Text(
+            value="play [a]gain",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER-150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(self.replay_txt)
+
+        # Create and view game exit key prompt.
+        self.quit_txt = games.Text(
+            value="[q]uit",
+            size=35,
+            color=color.light_gray,
+            x=SCREEN_WIDTH_CENTER+150,
+            y=SCREEN_HEIGHT_CENTER+150,
+            is_collideable=False
+        )
+        games.screen.add(self.quit_txt)
+
+    # Check for important object events in real time.
+    def update(self):
+        # A KEY starts the game anew (ending screen is cleared beforehand).
+        if games.keyboard.is_pressed(games.K_a):
+            self.clear_ending_screen()
+
+            for rock in self.debris_left:
+                games.screen.remove(rock)
+
+            # Create Game instance.
+            asteroblast = Gameplay()
+            # Defend these skies!
+            asteroblast.play()
+
+        if games.keyboard.is_pressed(games.K_q):
+            games.screen.quit()
+
+    # Screen shall be cleared and dummy pixel removed before game start.
+    def clear_ending_screen(self):
+        games.screen.remove(self.game_over_txt)
+        games.screen.remove(self.final_score_txt)
+        games.screen.remove(self.depth_reached_txt)
+        games.screen.remove(self.replay_txt)
+        games.screen.remove(self.quit_txt)
+
+        self.destroy()
 
 
-class GameStarter(object):
+class GameHandler(games.Sprite):
     """Intro screen and gameplay wrapper."""
 
     def __init__(self):
-        self.starter = StartScreen()
-        games.screen.add(self.starter)
+        self.intro = IntroScreen()
+        games.screen.add(self.intro)
 
 
 def main():
-    game = GameStarter()
+    game = GameHandler()
     # Run the actual game -- keep the screen running
     # by evoking the main loop.
     games.screen.mainloop()
