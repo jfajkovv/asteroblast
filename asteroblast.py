@@ -152,6 +152,46 @@ class SpacecraftExhaust(games.Animation):
         )
 
 
+class SpacecraftTurnAround(games.Animation):
+    """Craft's turning around animation sequence"""
+
+    # Load assets.
+    ANIMATION_IMGS = [
+        "./assets/graphics/turn-anim-1.png",
+        "./assets/graphics/turn-anim-2.png",
+        "./assets/graphics/turn-anim-3.png",
+        "./assets/graphics/turn-anim-4.png",
+        "./assets/graphics/turn-anim-5.png",
+    ]
+
+    def __init__(self, craft_x, craft_y, craft_angle, craft_x_vel, craft_y_vel):
+        # Object image representation shall spawn itself at the spacecraft.
+        x = craft_x
+        y = craft_y
+        angle = craft_angle
+
+        # In order to create the illusion, exhaust animation shall move onwards
+        # just like the ship itself.
+        dx = craft_x_vel
+        dy = craft_y_vel
+
+        # Appeal to the games.Animation constructor in order
+        # to set up frames and call upon coordinates.
+        super(SpacecraftTurnAround, self).__init__(
+            images=SpacecraftTurnAround.ANIMATION_IMGS,
+            x=x,
+            y=y,
+            angle=angle,
+            dx=dx,
+            dy=dy,
+            # Configure animation FPS.
+            repeat_interval=5,
+            # Set how many times animation shall display itself.
+            n_repeats=1,
+            is_collideable=False,
+        )
+
+
 class Debris(ScreenWrapper):
     """Space rock -- enemy in the gameplay. An asteroid to be shot."""
 
@@ -469,13 +509,14 @@ class Spacecraft(Bumper):
     """An actual player."""
 
     TURN_FACTOR = 3  # Turn angle factor.
+    TURN_AROUND_DELAY = 25  # Time unit to prevent overlapping turnings around of the ship.
     VELOCITY_FACTOR = 0.1  # An actual speed factor.
     VELOCITY_MAX = 4  # Top speed limit.
     REVERSE_PULL_FACTOR = 0.07  # An actual reverse speed factor.
     BLASTER_DELAY = 30  # Time unit until next shot.
     VIEWFINDER_DISPLAY_BUFFER = 150  # Blaster viewfinder display distance from the craft.
     VIEWFINDER_DISPLAY_DELAY = 10  # Time unit to slow down viewfinder toggle.
-    COOMETER_DISPLAY_DELAY = 15
+    COOMETER_DISPLAY_DELAY = 15  # Time unit to slow down coordinates display refresh.
 
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-0.png")
@@ -503,6 +544,8 @@ class Spacecraft(Bumper):
         self.viewfinder_cooldown = 0
 
         self.coometer_cooldown = 0
+        self.turn_around_delay = 0
+        self.turn_around_respawn = 150
 
     # Check for important object events in real time.
     def update(self):
@@ -517,9 +560,31 @@ class Spacecraft(Bumper):
         if games.keyboard.is_pressed(games.K_RIGHT):
             self.angle += Spacecraft.TURN_FACTOR
 
+        # Quickly turn the ship by 180 degrees via T KEY.
+        if games.keyboard.is_pressed(games.K_t) and self.turn_around_delay == 0:
+
+            new_turn_around = SpacecraftTurnAround(
+                craft_x=self.x,
+                craft_y=self.y,
+                craft_angle=self.angle,
+                craft_x_vel=self.dx,
+                craft_y_vel=self.dy
+            )
+            games.screen.add(new_turn_around)
+
+            self.turn_around()
+
+            self.turn_around_delay = Spacecraft.TURN_AROUND_DELAY
+
+            self.turn_around_respawn = 150
+
+        # Delay consecutive turns so they won't overlap.
+        if self.turn_around_delay:
+            self.turn_around_delay -= 1
+
         # Propel ship forward.
         if games.keyboard.is_pressed(games.K_UP):
-            # The trick is to shift the craft along the cartesian coordinate system:
+            # The trick is to shift the craft along coordinate system:
             # using math sine and cosine functions here to determine the exact placement;
             # the actual angle of the sprite has to be converted from degrees to radians,
             # because superwires uses degrees and math trigonometric functions are running
@@ -543,7 +608,7 @@ class Spacecraft(Bumper):
             self.dx -= Spacecraft.REVERSE_PULL_FACTOR * math.sin(math.radians(self.angle))
             self.dy -= Spacecraft.REVERSE_PULL_FACTOR * -math.cos(math.radians(self.angle))
 
-        # Decelerate the ship until [almost] stillness via S KEY.
+        # Decelerate the ship until [almost] stillness via R KEY.
         if games.keyboard.is_pressed(games.K_r):
             if self.dx > 0:
                 self.dx -= Spacecraft.VELOCITY_FACTOR
@@ -570,10 +635,11 @@ class Spacecraft(Bumper):
         if self.blaster_cooldown:
             self.blaster_cooldown -= 1
 
+        # If coordinates timer is 0...
         if self.coometer_cooldown == 0:
-            # Clear coordinates display (keep it updated).
+            # ...clear coordinates display (keep it updated)...
             self.remove_coordinates()
-            # Show spacecraft coordinate speedometer.
+            # ...show spacecraft coordinate speedometer.
             self.coordinates_txt = games.Text(
                 value=f"[ dx: {self.dx} dy: {self.dy} ]",
                 size=20,
@@ -585,6 +651,7 @@ class Spacecraft(Bumper):
             games.screen.add(self.coordinates_txt)
             self.coometer_cooldown = Spacecraft.COOMETER_DISPLAY_DELAY
 
+        # Keep coordinates timer synchro.
         if self.coometer_cooldown:
             self.coometer_cooldown -= 1
 
@@ -632,6 +699,9 @@ class Spacecraft(Bumper):
     def show_viewfinder(self):
         self.viewfinder = BlasterViewfinder(craft_x=self.x, craft_y=self.y, craft_angle=self.angle)
         games.screen.add(self.viewfinder)
+
+    def turn_around(self):
+        self.angle += 180
 
     def remove_viewfinder(self):
         games.screen.remove(self.viewfinder)
