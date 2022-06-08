@@ -545,7 +545,6 @@ class Spacecraft(Bumper):
 
         self.coometer_cooldown = 0
         self.turn_around_delay = 0
-        self.turn_around_respawn = 150
 
     # Check for important object events in real time.
     def update(self):
@@ -573,10 +572,7 @@ class Spacecraft(Bumper):
             games.screen.add(new_turn_around)
 
             self.turn_around()
-
             self.turn_around_delay = Spacecraft.TURN_AROUND_DELAY
-
-            self.turn_around_respawn = 150
 
         # Delay consecutive turns so they won't overlap.
         if self.turn_around_delay:
