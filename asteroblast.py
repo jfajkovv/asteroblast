@@ -120,8 +120,7 @@ class SpacecraftExhaust(games.Animation):
     # Load assets.
     ANIMATION_IMGS = [
         "./assets/graphics/exhaust-1.png",
-        "./assets/graphics/exhaust-2.png",
-        "./assets/graphics/exhaust-3.png"
+        "./assets/graphics/exhaust-2.png"
     ]
 
     def __init__(self, craft_x, craft_y, craft_angle, ship_x_vel, ship_y_vel):
