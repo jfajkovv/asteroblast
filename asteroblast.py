@@ -284,9 +284,9 @@ class ToughDebris(Debris):
 
     # Load assets.
     TOUGH_ASTEROID_IMAGES = {
-        SMALL: games.load_image('./assets/graphics/tough-asteroid-small.png'),
-        MEDIUM: games.load_image('./assets/graphics/tough-asteroid-medium.png'),
-        BIG: games.load_image('./assets/graphics/tough-asteroid-big.png')
+        SMALL: games.load_image('./assets/graphics/debris-small-tier-1.png'),
+        MEDIUM: games.load_image('./assets/graphics/debris-medium-tier-2.png'),
+        BIG: games.load_image('./assets/graphics/debris-big-tier-2.png')
     }
 
     def __init__(self, game, x, y, size):
@@ -364,9 +364,9 @@ class SuperToughDebris(ToughDebris):
 
     # Load assets.
     SUPER_TOUGH_ASTEROID_IMAGES = {
-        SMALL: games.load_image('./assets/graphics/super-tough-asteroid-small.png'),
-        MEDIUM: games.load_image('./assets/graphics/super-tough-asteroid-medium.png'),
-        BIG: games.load_image('./assets/graphics/super-tough-asteroid-big.png')
+        SMALL: games.load_image('./assets/graphics/debris-small-tier-1.png'),
+        MEDIUM: games.load_image('./assets/graphics/debris-medium-tier-3.png'),
+        BIG: games.load_image('./assets/graphics/debris-big-tier-3.png')
     }
 
     def __init__(self, game, x, y, size):
@@ -806,21 +806,29 @@ class Gameplay(object):
             y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
 #            if random.randrange(2) == 0:
-            new_debris = Debris(
+#            new_debris = Debris(
+#                game=self,
+#                x=x_shift,
+#                y=y_shift,
+#                size=random.randint(Debris.MEDIUM, Debris.BIG)
+#            )
+#            games.screen.add(new_debris)
+#            else:
+#            new_tough_debris = ToughDebris(
+#                    game=self,
+#                    x=x_shift,
+#                    y=y_shift,
+#                    size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
+#            )
+#            games.screen.add(new_tough_debris)
+
+            new_super_tough_debris = SuperToughDebris(
                 game=self,
                 x=x_shift,
                 y=y_shift,
-                size=random.randint(Debris.MEDIUM, Debris.BIG)
+                size=random.randint(SuperToughDebris.MEDIUM, SuperToughDebris.BIG)
             )
-            games.screen.add(new_debris)
-#            else:
-#                new_tough_debris = ToughDebris(
-#                        game=self,
-#                        x=x_shift,
-#                        y=y_shift,
-#                        size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
-#                )
-#                games.screen.add(new_tough_debris)
+            games.screen.add(new_super_tough_debris)
 
     # Show help screen.
     def display_help(self):
