@@ -156,11 +156,12 @@ class SpacecraftTurnAround(games.Animation):
 
     # Load assets.
     ANIMATION_IMGS = [
-        "./assets/graphics/turn-anim-1.png",
-        "./assets/graphics/turn-anim-2.png",
-        "./assets/graphics/turn-anim-3.png",
-        "./assets/graphics/turn-anim-4.png",
-        "./assets/graphics/turn-anim-5.png",
+        "./assets/graphics/qturn-anim-1.png",
+        "./assets/graphics/qturn-anim-2.png",
+        "./assets/graphics/qturn-anim-3.png",
+        "./assets/graphics/qturn-anim-4.png",
+        "./assets/graphics/qturn-anim-5.png",
+        "./assets/graphics/qturn-anim-6.png"
     ]
 
     def __init__(self, craft_x, craft_y, craft_angle, craft_x_vel, craft_y_vel):
@@ -204,9 +205,9 @@ class Debris(ScreenWrapper):
 
     # Load assets.
     ASTEROID_IMAGES = {
-        SMALL: games.load_image('./assets/graphics/debris-small-tier-0.png'),
-        MEDIUM: games.load_image('./assets/graphics/debris-medium-tier-0.png'),
-        BIG: games.load_image('./assets/graphics/debris-big-tier-0.png')
+        SMALL: games.load_image('./assets/graphics/debris-small-tier-1.png'),
+        MEDIUM: games.load_image('./assets/graphics/debris-medium-tier-1.png'),
+        BIG: games.load_image('./assets/graphics/debris-big-tier-1.png')
     }
 
     def __init__(self, game, x, y, size):
@@ -518,7 +519,7 @@ class Spacecraft(Bumper):
     COOMETER_DISPLAY_DELAY = 15  # Time unit to slow down coordinates display refresh.
 
     # Load assets.
-    SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-0.png")
+    SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-1.png")
 
     def __init__(self, game, x, y):
         # Appeal to the Bumper constructor in order
