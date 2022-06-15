@@ -204,9 +204,9 @@ class Debris(ScreenWrapper):
 
     # Load assets.
     ASTEROID_IMAGES = {
-        SMALL: games.load_image('./assets/graphics/asteroid-small.png'),
-        MEDIUM: games.load_image('./assets/graphics/asteroid-medium.png'),
-        BIG: games.load_image('./assets/graphics/asteroid-big.png')
+        SMALL: games.load_image('./assets/graphics/debris-small-tier-0.png'),
+        MEDIUM: games.load_image('./assets/graphics/debris-medium-tier-0.png'),
+        BIG: games.load_image('./assets/graphics/debris-big-tier-0.png')
     }
 
     def __init__(self, game, x, y, size):
