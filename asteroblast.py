@@ -454,7 +454,14 @@ class Blast(games.Animation, Bumper):
         "./assets/graphics/blast-bounce-4.png",
     ]
 
+    # All credit goes to:
+    # https://freesound.org/people/colmmullally/sounds/462220/
+    SOUND = games.load_sound('./assets/sounds/462220__colmmullally__zap.wav')
+
     def __init__(self, craft_x, craft_y, craft_angle):
+        # Play projectile sound.
+        Blast.SOUND.play()
+
         # Object animation representation shall spawn itself in front of the spacecraft.
         # Projectile position is calculated similarly to the Spacecraft class method.
         # The only difference is the shift in pixels by adding SPAWN_BUFFER_PX value.
