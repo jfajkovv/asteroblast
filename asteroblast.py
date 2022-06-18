@@ -529,6 +529,10 @@ class Spacecraft(Bumper):
     # Load assets.
     SPACECRAFT_IMG = games.load_image("./assets/graphics/spacecraft-1.png")
 
+    # All credit goes to:
+    # https://freesound.org/people/BloodPixelHero/sounds/572623/
+    SOUND = games.load_sound('./assets/sounds/572623__bloodpixelhero__spaceship-flight.wav')
+
     def __init__(self, game, x, y):
         # Appeal to the Bumper constructor in order
         # to set up the image and call upon coordinates.
@@ -588,6 +592,9 @@ class Spacecraft(Bumper):
 
         # Propel ship forward.
         if games.keyboard.is_pressed(games.K_UP):
+            # Play acceleration sound.
+            Spacecraft.SOUND.play()
+
             # The trick is to shift the craft along coordinate system:
             # using math sine and cosine functions here to determine the exact placement;
             # the actual angle of the sprite has to be converted from degrees to radians,
