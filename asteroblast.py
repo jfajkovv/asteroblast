@@ -56,6 +56,11 @@ class ScreenWrapper(games.Sprite):
 class Bumper(ScreenWrapper):
     """Collision detection system."""
 
+    # Load assets.
+    # All credit goes to:
+    # https://freesound.org/people/timgormly/sounds/170144/
+    SOUND = games.load_sound('./assets/sounds/170144__timgormly__8-bit-explosion2.wav')
+
     def update(self):
         # Inherit wrapping mechanics.
         super(Bumper, self).update()
@@ -76,6 +81,9 @@ class Bumper(ScreenWrapper):
             self.die()
 
     def die(self):
+        # Play explosion sound.
+        Bumper.SOUND.play()
+
         # Create new outburst instance and put it onto the screen.
         new_explosion = Explosion(x=self.x, y=self.y)
         games.screen.add(new_explosion)
