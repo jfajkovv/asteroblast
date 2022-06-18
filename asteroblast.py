@@ -805,30 +805,33 @@ class Gameplay(object):
             x_shift = self.spacecraft.x + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
             y_shift = self.spacecraft.y + random.randint(MIN_SPAWN_BUFFER_PX, MAX_SPAWN_BUFFER_PX)
 
-#            if random.randrange(2) == 0:
-#            new_debris = Debris(
-#                game=self,
-#                x=x_shift,
-#                y=y_shift,
-#                size=random.randint(Debris.MEDIUM, Debris.BIG)
-#            )
-#            games.screen.add(new_debris)
-#            else:
-            new_tough_debris = ToughDebris(
+            # Tier 3 debris spawns very rarely...
+            if random.randrange(20) == 0:
+                new_super_tough_debris = SuperToughDebris(
                     game=self,
                     x=x_shift,
                     y=y_shift,
-                    size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
-            )
-            games.screen.add(new_tough_debris)
-
-#            new_super_tough_debris = SuperToughDebris(
-#                game=self,
-#                x=x_shift,
-#                y=y_shift,
-#                size=random.randint(SuperToughDebris.MEDIUM, SuperToughDebris.BIG)
-#            )
-#            games.screen.add(new_super_tough_debris)
+                    size=random.randint(SuperToughDebris.MEDIUM, SuperToughDebris.BIG)
+                )
+                games.screen.add(new_super_tough_debris)
+            # Tier 2 debris sprawns just rarely...
+            elif random.randrange(10) == 0:
+                new_tough_debris = ToughDebris(
+                        game=self,
+                        x=x_shift,
+                        y=y_shift,
+                        size=random.randint(ToughDebris.MEDIUM, ToughDebris.BIG),
+                )
+                games.screen.add(new_tough_debris)
+            else:
+            # In any other case, just sprawn normal asteroids.
+                new_debris = Debris(
+                    game=self,
+                    x=x_shift,
+                    y=y_shift,
+                    size=random.randint(Debris.MEDIUM, Debris.BIG)
+                )
+                games.screen.add(new_debris)
 
     # Show help screen.
     def display_help(self):
