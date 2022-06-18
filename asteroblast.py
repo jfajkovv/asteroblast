@@ -753,6 +753,11 @@ class Gameplay(object):
     # Set up handy constants.
     TEXT_HEIGHT = 25
 
+    # Load assets.
+
+    # All credit goes to: PUBLIC DOMAIN.
+    ADVANCE_SOUND = games.load_sound('./assets/sounds/level-advance.wav')
+
     def __init__(self):
         # View starter help screen.
         self.display_help()
@@ -801,6 +806,9 @@ class Gameplay(object):
 
     # Proceed to the next level.
     def advance(self):
+        # Play level adavnce sound.
+        Gameplay.ADVANCE_SOUND.play()
+
         # Clear old depth number from the screen.
         games.screen.remove(self.depth_txt)
 
